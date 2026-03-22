@@ -7,23 +7,20 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="legal-bar">
-  ⚠ CrackerVoid yalnızca eğitim amaçlıdır. Paylaşılan içeriklerden yalnızca paylaşan kişi sorumludur. Site hiçbir hukuki sorumluluk kabul etmez. Kayıt olarak bu şartları kabul etmiş sayılırsın.
-</div>
+<div class="legal-bar">&#x26a0; CrackerVoid yalnizca egitim amaclidir. Paylasilan iceriklerden yalnizca paylasan kisi sorumludur.</div>
 <nav class="navbar">
   <a href="index.html" class="navbar-brand">Cracker<span>Void</span></a>
-  <button class="hamburger" id="hamburger-btn">☰</button>
+  <button class="hamburger" id="hamburger-btn">&#x2630;</button>
   <ul class="navbar-nav">
     <li><a href="index.html" class="active">Ana Sayfa</a></li>
     <li><a href="forum.html?cat=genel">Genel</a></li>
     <li><a href="forum.html?cat=cracking">Cracking</a></li>
-    <li><a href="forum.html?cat=tools">Araçlar</a></li>
+    <li><a href="forum.html?cat=tools">Araclar</a></li>
     <li><a href="forum.html?cat=leaks">Leaks</a></li>
     <li><a href="forum.html?cat=hesaplar">Hesaplar</a></li>
     <li><a href="forum.html?cat=pazar">Pazar</a></li>
-    <li><a href="leaderboard.html">🏆 Liderlik</a></li>
-    <li><a href="store.html">🛒 Mağaza</a></li>
-    <li><a href="users.html">👥 Üyeler</a></li>
+    <li><a href="leaderboard.html">&#x1f3c6; Liderlik</a></li>
+    <li><a href="users.html">&#x1f465; Uyeler</a></li>
   </ul>
   <div id="nav-right" style="display:flex;align-items:center;gap:8px;"></div>
 </nav>
@@ -37,46 +34,41 @@
     </svg>
   </div>
   <h1><span class="hero-crack">Cracker</span><span class="hero-void">Void</span></h1>
-  <p>Underground topluluk &middot; G&uuml;venlik &middot; Ara&ccedil;lar &middot; Payla&#x15f;&#x131;m</p>
+  <p>Underground topluluk &middot; Guvenlik &middot; Araclar &middot; Paylasim</p>
 </div>
 
 <div class="container">
   <div class="home-layout">
-
     <div class="home-left">
       <div class="home-topbar">
         <span class="home-topbar-title">&#x1f525; Son Konular</span>
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-          <button class="btn btn-outline btn-sm" onclick="openSearchModal()">🔍 Ara</button>
-          <button class="btn btn-primary btn-sm" onclick="openPostModal()">&#x270f; Konu Paylaş</button>
+          <button class="btn btn-outline btn-sm" onclick="openSearchModal()">&#x1f50d; Ara</button>
+          <button class="btn btn-primary btn-sm" onclick="openPostModal()">&#x270f; Konu Paylas</button>
         </div>
       </div>
-
       <div class="home-cat-filter">
-        <a href="#" class="hcf-item active" data-cat="all">Tümü</a>
+        <a href="#" class="hcf-item active" data-cat="all">Tumu</a>
         <a href="#" class="hcf-item" data-cat="genel" style="--cc:#3498db">Genel</a>
         <a href="#" class="hcf-item" data-cat="cracking" style="--cc:#e74c3c">Cracking</a>
-        <a href="#" class="hcf-item" data-cat="tools" style="--cc:#e67e22">Araçlar</a>
+        <a href="#" class="hcf-item" data-cat="tools" style="--cc:#e67e22">Araclar</a>
         <a href="#" class="hcf-item" data-cat="leaks" style="--cc:#1abc9c">Leaks</a>
         <a href="#" class="hcf-item" data-cat="hesaplar" style="--cc:#9b59b6">Hesaplar</a>
         <a href="#" class="hcf-item" data-cat="pazar" style="--cc:#f1c40f">Pazar</a>
         <a href="#" class="hcf-item" data-cat="soru-cevap" style="--cc:#27ae60">Soru&amp;Cevap</a>
         <a href="#" class="hcf-item" data-cat="duyurular" style="--cc:#c0392b">Duyurular</a>
       </div>
-
-      <div id="home-thread-list"></div>
-
+      <div id="home-thread-list"><div class="empty-msg">Yukleniyor...</div></div>
       <div class="index-stats-box" style="margin-top:14px">
-        <div class="index-cat-title">&#x1f4ca; İSTATİSTİKLER</div>
-        <div class="index-stat-row"><span>&#x1f465; Üye</span><strong id="stat-members">0</strong></div>
+        <div class="index-cat-title">&#x1f4ca; ISTATISTIKLER</div>
+        <div class="index-stat-row"><span>&#x1f465; Uye</span><strong id="stat-members">0</strong></div>
         <div class="index-stat-row"><span>&#x1f4cb; Konu</span><strong id="stat-threads">0</strong></div>
         <div class="index-stat-row"><span>&#x1f4ac; Mesaj</span><strong id="stat-posts">0</strong></div>
-        <div class="index-stat-row"><span><span class="online-dot"></span>Çevrimiiçi</span><strong id="stat-online">0</strong></div>
+        <div class="index-stat-row"><span><span class="online-dot"></span>Cevrimici</span><strong id="stat-online">0</strong></div>
       </div>
     </div>
 
     <div class="home-right">
-      <!-- PARTNER BANNER -->
       <a href="https://crackerlab.site" target="_blank" rel="noopener" class="partner-banner">
         <div class="partner-logo-wrap">
           <svg viewBox="0 0 100 100" width="52" height="52" xmlns="http://www.w3.org/2000/svg">
@@ -85,98 +77,75 @@
                 <stop offset="0%" style="stop-color:#7b6ef6"/>
                 <stop offset="100%" style="stop-color:#4a90e2"/>
               </linearGradient>
-              <filter id="glow">
-                <feGaussianBlur stdDeviation="3" result="blur"/>
-                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-              </filter>
             </defs>
-            <!-- L harfi - dikey -->
-            <polygon points="30,8 46,8 46,72 30,72" fill="url(#lg1)" filter="url(#glow)" opacity="0.95"/>
-            <!-- L harfi - yatay (3D perspektif) -->
+            <polygon points="30,8 46,8 46,72 30,72" fill="url(#lg1)" opacity="0.95"/>
             <polygon points="30,72 72,72 72,86 30,86" fill="#d0d8ff" opacity="0.9"/>
-            <!-- 3D yan yüz -->
-            <polygon points="46,72 72,72 72,86 46,86" fill="#a0aacc" opacity="0.7"/>
           </svg>
         </div>
         <div class="partner-info">
           <div class="partner-label">Partner Site</div>
           <div class="partner-name">CrackerLab</div>
-          <div class="partner-slogan">CrackerLab babadır</div>
+          <div class="partner-slogan">CrackerLab babadir</div>
         </div>
-        <span class="partner-arrow">↗</span>
+        <span class="partner-arrow">&#x2197;</span>
       </a>
-
       <div class="shoutbox">
         <div class="shoutbox-header">&#x1f4ac; Sohbet</div>
-        <div class="shoutbox-input-area" id="shoutbox-input-area">
-          <div id="shoutbox-login-prompt" style="display:none"><a href="login.html">Giriş yap</a> veya <a href="register.html">kayıt ol</a></div>
-          <form id="shoutbox-form" style="display:none">
-            <div class="shoutbox-form-row">
-              <input type="text" id="shoutbox-msg" placeholder="Mesaj yaz..." maxlength="200" autocomplete="off">
-              <button type="submit" class="btn btn-primary btn-sm">Gönder</button>
-            </div>
-          </form>
+        <div id="shoutbox-login-prompt" style="padding:10px;font-size:13px;color:var(--text3);display:none">
+          <a href="login.html">Giris yap</a> veya <a href="register.html">kayit ol</a>
         </div>
+        <form id="shoutbox-form" style="display:none;padding:8px">
+          <div class="shoutbox-form-row">
+            <input type="text" id="shoutbox-msg" placeholder="Mesaj yaz..." maxlength="200" autocomplete="off">
+            <button type="submit" class="btn btn-primary btn-sm">Gonder</button>
+          </div>
+        </form>
         <div class="shoutbox-messages" id="shoutbox-messages">
-          <div class="shoutbox-empty">Henüz mesaj yok.</div>
+          <div class="shoutbox-empty">Henuz mesaj yok.</div>
         </div>
       </div>
     </div>
-
   </div>
 </div>
 
-<!-- KONU PAYLAŞ MODAL -->
+<!-- KONU PAYLAS MODAL -->
 <div id="post-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closePostModal()">
   <div class="modal-box">
-    <div class="modal-header">
-      <span>&#x270f; Konu Paylaş</span>
-      <button class="modal-close" onclick="closePostModal()">&times;</button>
-    </div>
-    <div id="modal-alert" class="alert alert-error"></div>
-    <div class="form-group">
-      <label>Kategori</label>
+    <div class="modal-header"><span>&#x270f; Konu Paylas</span><button class="modal-close" onclick="closePostModal()">&times;</button></div>
+    <div id="modal-alert" class="alert alert-error" style="display:none"></div>
+    <div class="form-group"><label>Kategori</label>
       <div class="modal-cat-grid" id="modal-cat-grid">
-        <button class="mcat-btn" data-cat="genel" style="--cc:#3498db">&#x1f4cb; Genel</button>
-        <button class="mcat-btn" data-cat="cracking" style="--cc:#e74c3c">&#x1f50d; Cracking</button>
-        <button class="mcat-btn" data-cat="tools" style="--cc:#e67e22">&#x1f6e0; Araçlar</button>
-        <button class="mcat-btn" data-cat="leaks" style="--cc:#1abc9c">&#x1f4a7; Leaks</button>
-        <button class="mcat-btn" data-cat="hesaplar" style="--cc:#9b59b6">&#x1f511; Hesaplar</button>
-        <button class="mcat-btn" data-cat="pazar" style="--cc:#f1c40f">&#x1f4b0; Pazar</button>
-        <button class="mcat-btn" data-cat="soru-cevap" style="--cc:#27ae60">&#x2753; Soru&amp;Cevap</button>
-        <button class="mcat-btn" data-cat="duyurular" style="--cc:#c0392b">&#x1f4e2; Duyurular</button>
+        <button class="mcat-btn" data-cat="genel" style="--cc:#3498db">Genel</button>
+        <button class="mcat-btn" data-cat="cracking" style="--cc:#e74c3c">Cracking</button>
+        <button class="mcat-btn" data-cat="tools" style="--cc:#e67e22">Araclar</button>
+        <button class="mcat-btn" data-cat="leaks" style="--cc:#1abc9c">Leaks</button>
+        <button class="mcat-btn" data-cat="hesaplar" style="--cc:#9b59b6">Hesaplar</button>
+        <button class="mcat-btn" data-cat="pazar" style="--cc:#f1c40f">Pazar</button>
+        <button class="mcat-btn" data-cat="soru-cevap" style="--cc:#27ae60">Soru&amp;Cevap</button>
+        <button class="mcat-btn" data-cat="duyurular" style="--cc:#c0392b">Duyurular</button>
       </div>
     </div>
-    <div class="form-group">
-      <label>Başlık</label>
-      <input type="text" id="modal-title" placeholder="Konu başlığı..." maxlength="120">
-    </div>
-    <div class="form-group">
-      <label>İçerik</label>
-      <textarea id="modal-content" placeholder="Konunu buraya yaz..." style="min-height:120px"></textarea>
-    </div>
+    <div class="form-group"><label>Baslik</label><input type="text" id="modal-title" placeholder="Konu basligi..." maxlength="120"></div>
+    <div class="form-group"><label>Icerik</label><textarea id="modal-content" placeholder="Konunu buraya yaz..." style="min-height:120px"></textarea></div>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
       <input type="checkbox" id="modal-hidden" style="width:auto;accent-color:var(--accent)">
-      <label for="modal-hidden" style="font-size:13px;cursor:pointer;margin:0;text-transform:none">&#x1f512; İçeriği gizle (like atarak görüntule)</label>
+      <label for="modal-hidden" style="font-size:13px;cursor:pointer;margin:0;text-transform:none">&#x1f512; Icerigi gizle (like atarak goruntule)</label>
     </div>
-    <button class="btn btn-primary" style="width:100%" onclick="submitPost()">Konuyu Gönder</button>
+    <button class="btn btn-primary" style="width:100%" onclick="submitPost()">Konuyu Gonder</button>
   </div>
 </div>
 
-<!-- GELİŞMİŞ ARAMA MODAL -->
+<!-- ARAMA MODAL -->
 <div id="search-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
   <div class="modal-box" style="max-width:640px">
-    <div class="modal-header">
-      <span>🔍 Gelişmiş Arama</span>
-      <button class="modal-close" onclick="document.getElementById('search-modal').style.display='none'">&times;</button>
-    </div>
-    <input type="text" id="search-query" class="search-page-input" placeholder="Konu başlığı veya içerik ara...">
+    <div class="modal-header"><span>&#x1f50d; Arama</span><button class="modal-close" onclick="document.getElementById('search-modal').style.display='none'">&times;</button></div>
+    <input type="text" id="search-query" class="search-page-input" placeholder="Konu ara...">
     <div class="search-filters">
       <select id="search-cat">
-        <option value="all">Tüm Kategoriler</option>
+        <option value="all">Tum Kategoriler</option>
         <option value="genel">Genel</option>
         <option value="cracking">Cracking</option>
-        <option value="tools">Araçlar</option>
+        <option value="tools">Araclar</option>
         <option value="leaks">Leaks</option>
         <option value="hesaplar">Hesaplar</option>
         <option value="pazar">Pazar</option>
@@ -190,61 +159,175 @@
   </div>
 </div>
 
-<footer>&copy; 2026 <span>CrackerVoid</span> &middot; Tüm hakları saklıdır</footer>
-<script src="app.js"></script>
+<footer>&copy; 2026 <span>CrackerVoid</span></footer>
+<script src="api.js"></script>
 <script>
-(function() {
-  var oldIds = [1,2,3,4,5,6,7,8,9,10,11];
-  if (!localStorage.getItem('cf_seed_cleaned')) {
-    var t = JSON.parse(localStorage.getItem('cf_threads') || '[]');
-    localStorage.setItem('cf_threads', JSON.stringify(t.filter(function(x){ return oldIds.indexOf(x.id) === -1; })));
-    localStorage.setItem('cf_seed_cleaned', '1');
-  }
-})();
-
-var CAT_COLORS = {
-  genel:'#3498db', cracking:'#e74c3c', tools:'#e67e22',
-  leaks:'#1abc9c', hesaplar:'#9b59b6', pazar:'#f1c40f',
-  'soru-cevap':'#27ae60', duyurular:'#c0392b'
-};
-var CAT_LABELS = {
-  genel:'Genel', cracking:'Cracking', tools:'Araçlar',
-  leaks:'Leaks', hesaplar:'Hesaplar', pazar:'Pazar',
-  'soru-cevap':'Soru&Cevap', duyurular:'Duyurular'
-};
-
+var CAT_COLORS = {genel:'#3498db',cracking:'#e74c3c',tools:'#e67e22',leaks:'#1abc9c',hesaplar:'#9b59b6',pazar:'#f1c40f','soru-cevap':'#27ae60',duyurular:'#c0392b'};
+var CAT_LABELS = {genel:'Genel',cracking:'Cracking',tools:'Araclar',leaks:'Leaks',hesaplar:'Hesaplar',pazar:'Pazar','soru-cevap':'Soru&Cevap',duyurular:'Duyurular'};
 var currentFilter = 'all';
 var selectedCat = null;
 
-function renderHomeThreads(filter) {
-  var threads = Forum.getThreads();
-  if (filter && filter !== 'all') threads = threads.filter(function(t){ return t.cat === filter; });
-  threads = threads.slice(0, 40);
+async function renderHomeThreads(filter) {
+  var threads = await Forum.getThreads(filter !== 'all' ? filter : null);
+  threads = threads.slice(0,40);
   var el = document.getElementById('home-thread-list');
-  if (!threads.length) { el.innerHTML = '<div class="empty-msg">Henüz konu yok.</div>'; return; }
+  if (!threads.length) { el.innerHTML = '<div class="empty-msg">Henuz konu yok.</div>'; return; }
   el.innerHTML = threads.map(function(t) {
     var cc = CAT_COLORS[t.cat] || '#888';
     var cl = CAT_LABELS[t.cat] || t.cat;
-    var likeCount = Forum.getLikes(t.id).length;
-    return '<a href="thread.html?id=' + t.id + '" class="home-thread-row">' +
-      '<div class="home-thread-left">' +
-        '<span class="home-cat-badge" style="background:' + cc + '22;color:' + cc + ';border-color:' + cc + '44">' + cl + '</span>' +
-        '<span class="home-thread-title">' + escHtml(t.title) + '</span>' +
-        '<span class="home-thread-meta">' + escHtml(t.author) + ' &middot; ' + t.date + '</span>' +
-      '</div>' +
-      '<div class="home-thread-right">' +
-        '<span class="home-thread-likes">&#x1f44d; ' + likeCount + '</span>' +
-        '<span class="home-thread-replies">&#x1f4ac; ' + t.replies + '</span>' +
-      '</div>' +
+    return '<a href="thread.html?id='+t.id+'" class="home-thread-row">'+
+      '<div class="home-thread-left">'+
+        '<span class="home-cat-badge" style="background:'+cc+'22;color:'+cc+';border-color:'+cc+'44">'+cl+'</span>'+
+        '<span class="home-thread-title">'+escHtml(t.title)+'</span>'+
+        '<span class="home-thread-meta">'+escHtml(t.author)+' &middot; '+t.date+'</span>'+
+      '</div>'+
+      '<div class="home-thread-right">'+
+        '<span class="home-thread-replies">&#x1f4ac; '+t.replies+'</span>'+
+      '</div>'+
     '</a>';
   }).join('');
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  renderHomeThreads('all');
-  Announce.showIfNew();
+async function updateNavbar() {
   var user = Auth.current();
-  if (user) Badges.check(user.username);
+  var el = document.getElementById('nav-right');
+  if (!el) return;
+  if (user) {
+    var money = await Money.get(user.username);
+    var rank = getRankFromUser(user, money);
+    el.innerHTML =
+      '<span class="money-badge">&#x1f4b0; '+money+'</span>'+
+      '<span class="rank-badge" style="color:'+rank.color+';border-color:'+rank.color+'">'+rank.icon+' '+rank.name+'</span>'+
+      '<a href="messages.html" class="btn btn-outline btn-sm">&#x2709;</a>'+
+      '<a href="notifications.html" class="btn btn-outline btn-sm">&#x1f514;</a>'+
+      '<a href="profile.html" class="user-pill"><span>'+escHtml(user.username)+'</span></a>'+
+      '<a href="settings.html" class="btn btn-outline btn-sm">&#x2699;</a>'+
+      '<button class="btn btn-outline btn-sm" onclick="Auth.logout()">Cikis</button>';
+  } else {
+    el.innerHTML = '<a href="login.html" class="btn btn-outline btn-sm">Giris Yap</a><a href="register.html" class="btn btn-primary btn-sm">Kayit Ol</a>';
+  }
+}
+
+async function initShoutbox() {
+  var user = Auth.current();
+  var form = document.getElementById('shoutbox-form');
+  var prompt = document.getElementById('shoutbox-login-prompt');
+  if (user) { if(form) form.style.display='flex'; if(prompt) prompt.style.display='none'; }
+  else { if(form) form.style.display='none'; if(prompt) prompt.style.display='block'; }
+  await renderShouts();
+  if (form) {
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var input = document.getElementById('shoutbox-msg');
+      var msg = input.value.trim();
+      if (!msg) return;
+      await Shoutbox.add(msg, form.dataset.replyTo || null);
+      input.value = '';
+      delete form.dataset.replyTo;
+      input.placeholder = 'Mesaj yaz...';
+      await renderShouts();
+    });
+  }
+}
+
+async function renderShouts() {
+  var container = document.getElementById('shoutbox-messages');
+  if (!container) return;
+  var shouts = await Shoutbox.get();
+  var user = Auth.current();
+  if (!shouts.length) { container.innerHTML = '<div class="shoutbox-empty">Henuz mesaj yok.</div>'; return; }
+  container.innerHTML = shouts.map(function(s) {
+    var canDel = user && (user.username === s.author || user.role === 'admin' || user.role === 'founder');
+    var delBtn = canDel ? '<button class="shout-del-btn" onclick="shoutDelete('+s.id+')">&#x1f5d1;</button>' : '';
+    return '<div class="shout-item">'+
+      '<div class="shout-top"><a href="profile.html?u='+escHtml(s.author)+'" class="shout-author">'+escHtml(s.author)+'</a><span class="shout-time">'+s.time+'</span>'+delBtn+'</div>'+
+      '<div class="shout-text">'+escHtml(s.msg)+'</div>'+
+      '<button class="shout-reply-btn" onclick="shoutReply(\''+ escHtml(s.author) +'\')">&#x21a9; Cevapla</button>'+
+    '</div>';
+  }).join('');
+}
+
+window.shoutDelete = async function(id) {
+  await Shoutbox.delete(id);
+  await renderShouts();
+};
+window.shoutReply = function(username) {
+  var form = document.getElementById('shoutbox-form');
+  var input = document.getElementById('shoutbox-msg');
+  if (!Auth.current()) { window.location.href = 'login.html'; return; }
+  form.dataset.replyTo = username;
+  input.placeholder = '@'+username+' cevapliyorsun...';
+  input.focus();
+};
+
+async function doSearch() {
+  var q = document.getElementById('search-query').value.trim();
+  var cat = document.getElementById('search-cat').value;
+  var author = document.getElementById('search-author').value.trim();
+  var params = new URLSearchParams();
+  if (q) params.set('q', q);
+  if (cat && cat !== 'all') params.set('cat', cat);
+  if (author) params.set('author', author);
+  var results = await (await fetch(API_BASE + '/api/search?' + params, {credentials:'include'})).json();
+  var el = document.getElementById('search-results');
+  if (!results.length) { el.innerHTML = '<div class="empty-msg">Sonuc bulunamadi.</div>'; return; }
+  el.innerHTML = results.slice(0,20).map(function(t) {
+    var cc = CAT_COLORS[t.cat] || '#888';
+    var cl = CAT_LABELS[t.cat] || t.cat;
+    return '<a href="thread.html?id='+t.id+'" class="home-thread-row" style="margin-bottom:6px">'+
+      '<div class="home-thread-left">'+
+        '<span class="home-cat-badge" style="background:'+cc+'22;color:'+cc+';border-color:'+cc+'44">'+cl+'</span>'+
+        '<span class="home-thread-title">'+escHtml(t.title)+'</span>'+
+        '<span class="home-thread-meta">'+escHtml(t.author)+' &middot; '+t.date+'</span>'+
+      '</div>'+
+      '<div class="home-thread-right"><span>&#x1f4ac; '+t.replies+'</span></div>'+
+    '</a>';
+  }).join('');
+}
+
+function openSearchModal() {
+  document.getElementById('search-modal').style.display = 'flex';
+  document.getElementById('search-results').innerHTML = '';
+  document.getElementById('search-query').value = '';
+  setTimeout(function(){ document.getElementById('search-query').focus(); }, 50);
+}
+
+function openPostModal() {
+  if (!Auth.current()) { window.location.href = 'login.html'; return; }
+  document.getElementById('post-modal').style.display = 'flex';
+  document.getElementById('modal-alert').style.display = 'none';
+  document.getElementById('modal-title').value = '';
+  document.getElementById('modal-content').value = '';
+  document.getElementById('modal-hidden').checked = false;
+  document.querySelectorAll('.mcat-btn').forEach(function(b){ b.classList.remove('selected'); });
+  selectedCat = null;
+}
+function closePostModal() { document.getElementById('post-modal').style.display = 'none'; }
+
+async function submitPost() {
+  var title = document.getElementById('modal-title').value.trim();
+  var content = document.getElementById('modal-content').value.trim();
+  var hidden = document.getElementById('modal-hidden').checked;
+  var alertEl = document.getElementById('modal-alert');
+  if (!selectedCat) { alertEl.textContent = 'Kategori secmelisin.'; alertEl.style.display='block'; return; }
+  if (!title) { alertEl.textContent = 'Baslik bos olamaz.'; alertEl.style.display='block'; return; }
+  if (!content) { alertEl.textContent = 'Icerik bos olamaz.'; alertEl.style.display='block'; return; }
+  var id = await Forum.addThread(selectedCat, title, content, hidden);
+  if (id) { closePostModal(); window.location.href = 'thread.html?id=' + id; }
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
+  await Auth.init();
+  await updateNavbar();
+  await renderHomeThreads('all');
+  await initShoutbox();
+  Announce.showIfNew();
+
+  var stats = await Forum.stats();
+  var sm = document.getElementById('stat-members'); if(sm) sm.textContent = stats.members||0;
+  var st = document.getElementById('stat-threads'); if(st) st.textContent = stats.threads||0;
+  var sp = document.getElementById('stat-posts');   if(sp) sp.textContent = stats.posts||0;
+  var so = document.getElementById('stat-online');  if(so) so.textContent = Auth.current() ? 1 : 0;
 
   document.querySelectorAll('.hcf-item').forEach(function(a) {
     a.addEventListener('click', function(e) {
@@ -263,61 +346,12 @@ document.addEventListener('DOMContentLoaded', function() {
       selectedCat = btn.dataset.cat;
     });
   });
+
+  // Hamburger
+  var hbtn = document.getElementById('hamburger-btn');
+  var hnav = document.querySelector('.navbar-nav');
+  if (hbtn && hnav) hbtn.addEventListener('click', function(){ hnav.classList.toggle('nav-open'); });
 });
-
-function openSearchModal() {
-  document.getElementById('search-modal').style.display = 'flex';
-  document.getElementById('search-results').innerHTML = '';
-  document.getElementById('search-query').value = '';
-  setTimeout(function(){ document.getElementById('search-query').focus(); }, 50);
-}
-
-function doSearch() {
-  var q = document.getElementById('search-query').value.trim();
-  var cat = document.getElementById('search-cat').value;
-  var author = document.getElementById('search-author').value.trim();
-  var results = advancedSearch(q, cat, author);
-  var el = document.getElementById('search-results');
-  if (!results.length) { el.innerHTML = '<div class="empty-msg">Sonuç bulunamadı.</div>'; return; }
-  el.innerHTML = results.slice(0,20).map(function(t) {
-    var cc = CAT_COLORS[t.cat] || '#888';
-    var cl = CAT_LABELS[t.cat] || t.cat;
-    return '<a href="thread.html?id=' + t.id + '" class="home-thread-row" style="margin-bottom:6px">' +
-      '<div class="home-thread-left">' +
-        '<span class="home-cat-badge" style="background:' + cc + '22;color:' + cc + ';border-color:' + cc + '44">' + cl + '</span>' +
-        '<span class="home-thread-title">' + escHtml(t.title) + '</span>' +
-        '<span class="home-thread-meta">' + escHtml(t.author) + ' · ' + t.date + '</span>' +
-      '</div>' +
-      '<div class="home-thread-right"><span class="home-thread-replies">💬 ' + t.replies + '</span></div>' +
-    '</a>';
-  }).join('');
-}
-
-function openPostModal() {
-  if (!Auth.current()) { window.location.href = 'login.html'; return; }
-  document.getElementById('post-modal').style.display = 'flex';
-  document.getElementById('modal-alert').style.display = 'none';
-  document.getElementById('modal-title').value = '';
-  document.getElementById('modal-content').value = '';
-  document.getElementById('modal-hidden').checked = false;
-  document.querySelectorAll('.mcat-btn').forEach(function(b){ b.classList.remove('selected'); });
-  selectedCat = null;
-}
-function closePostModal() {
-  document.getElementById('post-modal').style.display = 'none';
-}
-function submitPost() {
-  var title = document.getElementById('modal-title').value.trim();
-  var content = document.getElementById('modal-content').value.trim();
-  var hidden = document.getElementById('modal-hidden').checked;
-  var alertEl = document.getElementById('modal-alert');
-  if (!selectedCat) { alertEl.textContent = 'Kategori seçmelisin.'; alertEl.style.display='block'; return; }
-  if (!title) { alertEl.textContent = 'Başlık boş olamaz.'; alertEl.style.display='block'; return; }
-  if (!content) { alertEl.textContent = 'İçerik boş olamaz.'; alertEl.style.display='block'; return; }
-  var id = Forum.addThread(selectedCat, title, content, hidden);
-  closePostModal();
-  window.location.href = 'thread.html?id=' + id;
-}
 </script>
 </body>
 </html>

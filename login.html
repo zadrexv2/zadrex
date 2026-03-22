@@ -35,6 +35,24 @@
     <div class="form-footer">Hesabın yok mu? <a href="register.html">Kayıt Ol</a></div>
   </div>
 </div>
-<script src="app.js"></script>
-</body>
-</html>
+<script src="api.js"></script>
+<script>
+document.getElementById('login-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const u = document.getElementById('username').value.trim();
+  const p = document.getElementById('password').value;
+  const alertEl = document.getElementById('alert-box');
+  alertEl.style.display = 'none';
+  const d = await Auth.login(u, p);
+  if (d.ok) {
+    const r = new URLSearchParams(location.search).get('r');
+    window.location.href = r || 'index.html';
+  } else if (d.msg === 'banned') {
+    alertEl.textContent = 'Hesabın banlandı.';
+    alertEl.style.display = 'block';
+  } else {
+    alertEl.textContent = d.msg || 'Kullanıcı adı veya şifre hatalı.';
+    alertEl.style.display = 'block';
+  }
+});
+</script>

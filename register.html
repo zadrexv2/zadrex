@@ -43,6 +43,24 @@
     <div class="form-footer">Zaten hesabın var mı? <a href="login.html">Giriş Yap</a></div>
   </div>
 </div>
-<script src="app.js"></script>
-</body>
-</html>
+<script src="api.js"></script>
+<script>
+document.getElementById('register-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const u = document.getElementById('username').value.trim();
+  const em = document.getElementById('email').value.trim();
+  const p = document.getElementById('password').value;
+  const p2 = document.getElementById('password2').value;
+  const alertEl = document.getElementById('alert-box');
+  alertEl.style.display = 'none';
+  if (p !== p2) { alertEl.textContent = 'Şifreler eşleşmiyor.'; alertEl.style.display='block'; return; }
+  if (p.length < 6) { alertEl.textContent = 'Şifre en az 6 karakter.'; alertEl.style.display='block'; return; }
+  const d = await Auth.register(u, em, p);
+  if (d.ok) {
+    window.location.href = 'index.html';
+  } else {
+    alertEl.textContent = d.msg || 'Kayıt başarısız.';
+    alertEl.style.display = 'block';
+  }
+});
+</script>

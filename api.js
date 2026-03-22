@@ -1,7 +1,7 @@
 // ── CrackerVoid API Client ────────────────────────────
-const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
   ? 'http://localhost:5000'
-  : ''; // aynı domain'de çalışınca boş bırak
+  : 'https://zadrex.onrender.com';
 
 async function apiFetch(path, opts = {}) {
   const res = await fetch(API_BASE + path, {
