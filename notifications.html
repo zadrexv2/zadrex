@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bildirimler - CrackerVoid</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="legal-bar">
+  ⚠ CrackerVoid yalnızca eğitim amaçlıdır. Paylaşılan içeriklerden yalnızca paylaşan kişi sorumludur. Site hiçbir hukuki sorumluluk kabul etmez. Kayıt olarak bu şartları kabul etmiş sayılırsın.
+</div>
+
+<nav class="navbar">
+  <a href="index.html" class="navbar-brand">Cracker<span>Void</span></a>
+  <button class="hamburger" id="hamburger-btn">☰</button>
+  <ul class="navbar-nav">
+    <li><a href="index.html">Ana Sayfa</a></li>
+  </ul>
+  <div id="nav-right" style="display:flex;align-items:center;gap:8px;"></div>
+</nav>
+<div class="container" style="max-width:700px">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <h2 style="font-size:16px;font-weight:800;color:var(--text)">🔔 Bildirimler</h2>
+    <button class="btn btn-outline btn-sm" onclick="markAll()">Tümünü Okundu İşaretle</button>
+  </div>
+  <div id="notif-list"></div>
+</div>
+<footer>© 2026 <span>CrackerVoid</span></footer>
+<script src="app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  if (!Auth.require()) return;
+  const user = Auth.current();
+  Notif.markRead(user.username);
+  updateNavbar();
+  render();
+
+  function render() {
+    const notifs = Notif.get(user.username);
+    const el = document.getElementById('notif-list');
+    if (!notifs.length) {
+      el.innerHTML = '<div class="empty-msg">Henüz bildirim yok.</div>';
+      return;
+    }
+    const icons = { like:'👍', reply:'💬', follow:'👤', dm:'✉' };
+    el.innerHTML = notifs.map(n => `
+      <div class="notif-item${n.read ? '' : ' notif-unread'}">
+        <span class="notif-icon">${icons[n.type] || '🔔'}</span>
+        <div style="flex:1">
+          <div style="font-size:13px;color:var(--text)">${escHtml(n.msg)}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">${n.time}</div>
+        </div>
+        ${n.link ? `<a href="${escHtml(n.link)}" class="btn btn-outline btn-sm" style="font-size:11px">Git</a>` : ''}
+      </div>`).join('');
+  }
+
+  window.markAll = function() {
+    Notif.markRead(user.username);
+    render();
+    updateNavbar();
+  };
+});
+</script>
+</body>
+</html>

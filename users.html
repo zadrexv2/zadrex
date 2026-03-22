@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Üyeler - CrackerVoid</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="legal-bar">
+  ⚠ CrackerVoid yalnızca eğitim amaçlıdır. Paylaşılan içeriklerden yalnızca paylaşan kişi sorumludur. Site hiçbir hukuki sorumluluk kabul etmez. Kayıt olarak bu şartları kabul etmiş sayılırsın.
+</div>
+<nav class="navbar">
+  <a href="index.html" class="navbar-brand">Cracker<span>Void</span></a>
+  <button class="hamburger" id="hamburger-btn">☰</button>
+  <ul class="navbar-nav">
+    <li><a href="index.html">Ana Sayfa</a></li>
+    <li><a href="forum.html?cat=genel">Genel</a></li>
+    <li><a href="forum.html?cat=cracking">Cracking</a></li>
+    <li><a href="forum.html?cat=tools">Araçlar</a></li>
+    <li><a href="forum.html?cat=leaks">Leaks</a></li>
+    <li><a href="forum.html?cat=pazar">Pazar</a></li>
+    <li><a href="leaderboard.html">🏆 Liderlik</a></li>
+    <li><a href="users.html" class="active">👥 Üyeler</a></li>
+  </ul>
+  <div id="nav-right" style="display:flex;align-items:center;gap:8px;"></div>
+</nav>
+
+<div class="container" style="max-width:900px">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px">
+    <div style="font-size:13px;color:var(--text3)">Toplam <span id="total-count" style="color:var(--accent);font-weight:700">0</span> üye</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <input type="text" id="user-search" placeholder="Kullanıcı ara..." style="background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:7px 14px;color:var(--text);font-size:13px;outline:none;width:200px" oninput="renderUsers()">
+      <select id="user-sort" onchange="renderUsers()" style="background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:7px 12px;color:var(--text);font-size:13px;outline:none;cursor:pointer">
+        <option value="joined">Katılım (Yeni)</option>
+        <option value="posts">Mesaj Sayısı</option>
+        <option value="money">Para</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="users-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px"></div>
+</div>
+
+<footer>© 2026 <span>CrackerVoid</span></footer>
+<script src="app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  renderUsers();
+});
+
+function renderUsers() {
+  var query = document.getElementById('user-search').value.trim().toLowerCase();
+  var sort = document.getElementById('user-sort').value;
+  var users = Auth.getUsers();
+
+  if (query) users = users.filter(function(u){ return u.username.toLowerCase().includes(query); });
+
+  if (sort === 'posts') users = users.sort(function(a,b){ return (b.posts||0)-(a.posts||0); });
+  else if (sort === 'money') users = users.sort(function(a,b){ return Money.get(b.username)-Money.get(a.username); });
+  else users = users.sort(function(a,b){ return b.id - a.id; });
+
+  document.getElementById('total-count').textContent = users.length;
+
+  if (!users.length) {
+    document.getElementById('users-grid').innerHTML = '<div class="empty-msg" style="grid-column:1/-1">Kullanıcı bulunamadı.</div>';
+    return;
+  }
+
+  document.getElementById('users-grid').innerHTML = users.map(function(u) {
+    var rank = getRank(u.username);
+    var money = Money.get(u.username);
+    var threads = Forum.getThreads().filter(function(t){ return t.author === u.username; }).length;
+    var badges = Badges.get(u.username).concat(u.badges || []);
+    var badgeHtml = badges.slice(0,5).map(function(b){
+      var def = Badges.DEFS.find(function(x){ return x.id === b; });
+      return def ? '<span title="'+escHtml(def.name)+'">'+def.icon+'</span>' : '<span>'+escHtml(b)+'</span>';
+    }).join('');
+
+    var avHtml = u.avatarImg
+      ? '<img src="'+u.avatarImg+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;position:absolute;inset:0">'
+      : '<span style="font-size:22px;font-weight:800;color:#fff">'+escHtml(u.username[0].toUpperCase())+'</span>';
+
+    return '<a href="profile.html?u='+escHtml(u.username)+'" class="user-card-link" style="text-decoration:none">' +
+      '<div class="user-card" style="background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:10px;transition:border-color .2s;cursor:pointer" onmouseover="this.style.borderColor=\''+rank.color+'\'" onmouseout="this.style.borderColor=\'var(--border2)\'">' +
+        '<div style="display:flex;align-items:center;gap:12px">' +
+          '<div style="width:52px;height:52px;border-radius:50%;background:'+(u.avatarImg?'transparent':rank.color)+';flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;border:2px solid '+rank.color+'44">'+avHtml+'</div>' +
+          '<div style="flex:1;min-width:0">' +
+            '<div style="font-size:14px;font-weight:700;color:'+(rank.nameColor||rank.color)+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+escHtml(u.username)+(rank.customTitle?'<span style="font-size:10px;margin-left:5px;background:rgba(255,255,255,.08);border-radius:3px;padding:1px 5px;border:1px solid '+(rank.nameColor||rank.color)+'44">'+escHtml(rank.customTitle)+'</span>':'')+'</div>' +
+            '<div style="font-size:11px;color:'+rank.color+';margin-top:2px">'+rank.icon+' '+rank.name+'</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:11px;color:var(--text3);text-align:center">' +
+          '<div style="background:var(--bg3);border-radius:5px;padding:5px 0"><div style="font-size:13px;font-weight:700;color:var(--text)">'+(u.posts||0)+'</div>Mesaj</div>' +
+          '<div style="background:var(--bg3);border-radius:5px;padding:5px 0"><div style="font-size:13px;font-weight:700;color:var(--text)">'+threads+'</div>Konu</div>' +
+          '<div style="background:var(--bg3);border-radius:5px;padding:5px 0"><div style="font-size:13px;font-weight:700;color:#2ecc71">'+money+'</div>💰</div>' +
+        '</div>' +
+        (badgeHtml ? '<div style="font-size:16px;display:flex;gap:4px;flex-wrap:wrap">'+badgeHtml+'</div>' : '') +
+        '<div style="font-size:11px;color:var(--text3)">📅 '+escHtml(u.joined||'-')+'</div>' +
+      '</div>' +
+    '</a>';
+  }).join('');
+}
+</script>
+</body>
+</html>

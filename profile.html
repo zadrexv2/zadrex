@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil - CrackerVoid</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="legal-bar">
+  ⚠ CrackerVoid yalnızca eğitim amaçlıdır. Paylaşılan içeriklerden yalnızca paylaşan kişi sorumludur. Site hiçbir hukuki sorumluluk kabul etmez. Kayıt olarak bu şartları kabul etmiş sayılırsın.
+</div>
+
+<nav class="navbar">
+  <a href="index.html" class="navbar-brand">Cracker<span>Void</span></a>
+  <button class="hamburger" id="hamburger-btn">☰</button>
+  <ul class="navbar-nav">
+    <li><a href="index.html">Ana Sayfa</a></li>
+    <li><a href="forum.html?cat=genel">Genel</a></li>
+    <li><a href="forum.html?cat=cracking">Cracking</a></li>
+    <li><a href="forum.html?cat=tools">Araçlar</a></li>
+    <li><a href="forum.html?cat=leaks">Leaks</a></li>
+    <li><a href="forum.html?cat=pazar">Pazar</a></li>
+  </ul>
+  <div id="nav-right" style="display:flex;align-items:center;gap:8px;"></div>
+</nav>
+<div class="container">
+  <div id="profile-content"><div class="empty-msg">Yükleniyor...</div></div>
+</div>
+<footer>© 2026 <span>CrackerVoid</span></footer>
+<script src="app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const currentUser = Auth.current();
+  const params = new URLSearchParams(location.search);
+  const targetUsername = params.get('u');
+
+  // Kendi profili mi yoksa başkasının mı?
+  let profileUser;
+  if (targetUsername) {
+    profileUser = Auth.getUsers().find(u => u.username === targetUsername);
+    if (!profileUser) {
+      document.getElementById('profile-content').innerHTML = '<div class="empty-msg">Kullanıcı bulunamadı.</div>';
+      return;
+    }
+  } else {
+    if (!currentUser) { window.location.href = 'login.html'; return; }
+    profileUser = currentUser;
+  }
+
+  const isOwnProfile = currentUser && currentUser.username === profileUser.username;
+  const threads = Forum.getThreads().filter(t => t.author === profileUser.username);
+  const rank = getRank(profileUser.username);
+  const following = Follow.getFollowing(profileUser.username).length;
+  const followers = Follow.getFollowers(profileUser.username).length;
+  const isFollowing = currentUser && !isOwnProfile && Follow.isFollowing(currentUser.username, profileUser.username);
+
+  const avHtml = profileUser.avatarImg
+    ? `<img src="${profileUser.avatarImg}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;position:absolute;inset:0">`
+    : profileUser.username[0].toUpperCase();
+
+  const actionBtns = isOwnProfile
+    ? `<div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a href="settings.html" class="btn btn-outline btn-sm">⚙ Ayarlar</a>
+        <button class="btn btn-outline btn-sm" onclick="Auth.logout()">Çıkış Yap</button>
+       </div>`
+    : (currentUser ? `<div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" id="follow-btn" onclick="toggleFollow()">${isFollowing ? '✓ Takip Ediliyor' : '+ Takip Et'}</button>
+        <a href="messages.html?u=${escHtml(profileUser.username)}" class="btn btn-primary btn-sm">✉ Mesaj Gönder</a>
+       </div>` : '');
+
+  document.getElementById('profile-content').innerHTML = `
+    <div class="profile-card">
+      <div class="profile-av" style="background:${profileUser.avatarImg ? 'transparent' : (profileUser.avatarColor || '#c0392b')};overflow:hidden;position:relative">${avHtml}</div>
+      <div class="profile-info" style="flex:1">
+        <h2>${escHtml(profileUser.username)}</h2>
+        <div class="meta">
+          <div>Rol: <span style="color:${rank.color};font-weight:700">${rank.icon} ${rank.name}</span></div>
+          <div>Katılım: <span>${profileUser.joined}</span></div>
+          <div>Mesaj: <span>${profileUser.posts || 0}</span></div>
+          <div>Konu: <span>${threads.length}</span></div>
+          <div>Takipçi: <span id="follower-count">${followers}</span></div>
+          <div>Takip: <span>${following}</span></div>
+          ${isOwnProfile ? `<div>💰 Money: <span style="color:#2ecc71;font-weight:700">${Money.get(profileUser.username)}</span></div>` : ''}
+          ${profileUser.location ? `<div>📍 <span>${escHtml(profileUser.location)}</span></div>` : ''}
+          ${profileUser.discord ? `<div>💬 <span>${escHtml(profileUser.discord)}</span></div>` : ''}
+          ${profileUser.website ? `<div>🌐 <span><a href="${escHtml(profileUser.website)}" target="_blank" rel="noopener">${escHtml(profileUser.website)}</a></span></div>` : ''}
+        </div>
+        ${profileUser.bio ? `<div style="margin-top:10px;font-size:13px;color:var(--text2);line-height:1.6">${escHtml(profileUser.bio)}</div>` : ''}
+        ${(() => {
+          const earnedBadges = Badges.get(profileUser.username);
+          const shopBadges = profileUser.badges || [];
+          const allBadges = [...new Set([...earnedBadges, ...shopBadges])];
+          if (!allBadges.length) return '';
+          const badgeDefs = Badges.DEFS;
+          return '<div class="user-badges" style="margin-top:8px">' +
+            allBadges.map(b => {
+              const def = badgeDefs.find(x => x.id === b);
+              return def
+                ? `<span class="user-badge-icon" title="${escHtml(def.name)}: ${escHtml(def.desc)}">${def.icon}</span>`
+                : `<span class="user-badge-icon">${escHtml(b)}</span>`;
+            }).join('') + '</div>';
+        })()}
+      </div>
+      ${actionBtns}
+    </div>
+
+    <div class="thread-list" style="margin-bottom:20px">
+      <div class="cat-header" style="padding:10px 16px"><h2 style="font-size:12px;color:var(--accent)">Açılan Konular</h2></div>
+      ${threads.length ? threads.map(t => `
+        <div class="thread-row">
+          <div class="thread-title-col">
+            <a href="thread.html?id=${t.id}">${escHtml(t.title)}</a>
+            <div class="thread-meta">${t.date}</div>
+          </div>
+          <div class="thread-stat tc">${t.replies}</div>
+          <div class="thread-stat tc">${t.views}</div>
+          <div class="thread-last">${t.date}</div>
+        </div>`).join('') : '<div class="empty-msg">Henüz konu açılmamış.</div>'}
+    </div>
+
+    ${isOwnProfile ? (() => {
+      const savedIds = Saved.get(profileUser.username);
+      const savedThreads = savedIds.map(id => Forum.getThread(id)).filter(Boolean);
+      return `<div class="thread-list" style="margin-bottom:20px">
+        <div class="cat-header" style="padding:10px 16px"><h2 style="font-size:12px;color:#f1c40f">🔖 Kaydedilen Konular</h2></div>
+        ${savedThreads.length ? savedThreads.map(t => `
+          <div class="thread-row">
+            <div class="thread-title-col">
+              <a href="thread.html?id=${t.id}">${escHtml(t.title)}</a>
+              <div class="thread-meta">${escHtml(t.author)} · ${t.date}</div>
+            </div>
+            <div class="thread-stat tc">${t.replies}</div>
+            <div class="thread-stat tc">${t.views}</div>
+            <div class="thread-last">${t.date}</div>
+          </div>`).join('') : '<div class="empty-msg">Kaydedilen konu yok.</div>'}
+      </div>`;
+    })() : ''}
+
+  window.toggleFollow = function() {
+    if (!currentUser) { window.location.href = 'login.html'; return; }
+    const nowFollowing = Follow.toggle(currentUser.username, profileUser.username);
+    const btn = document.getElementById('follow-btn');
+    if (btn) btn.textContent = nowFollowing ? '✓ Takip Ediliyor' : '+ Takip Et';
+    const fc = document.getElementById('follower-count');
+    if (fc) fc.textContent = Follow.getFollowers(profileUser.username).length;
+  };
+});
+</script>
+</body>
+</html>

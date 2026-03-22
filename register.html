@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kayıt Ol - CrackerVoid</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="legal-bar">
+  ⚠ CrackerVoid yalnızca eğitim amaçlıdır. Paylaşılan içeriklerden yalnızca paylaşan kişi sorumludur. Site hiçbir hukuki sorumluluk kabul etmez. Kayıt olarak bu şartları kabul etmiş sayılırsın.
+</div>
+
+<nav class="navbar">
+  <a href="index.html" class="navbar-brand">Cracker<span>Void</span></a>
+  <ul class="navbar-nav"><li><a href="index.html">Ana Sayfa</a></li></ul>
+  <div id="nav-right" style="display:flex;align-items:center;gap:8px;"></div>
+</nav>
+<div class="auth-wrapper">
+  <div class="auth-box">
+    <h2>Kayıt Ol</h2>
+    <p class="sub">Topluluğa katılmak için hesap oluştur.</p>
+    <div id="alert-box" class="alert alert-error"></div>
+    <form id="register-form">
+      <div class="form-group">
+        <label>Kullanıcı Adı</label>
+        <input type="text" id="username" placeholder="kullaniciadi" required minlength="3" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label>E-posta</label>
+        <input type="email" id="email" placeholder="ornek@mail.com" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Şifre</label>
+        <input type="password" id="password" placeholder="En az 6 karakter" required minlength="6" autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <label>Şifre Tekrar</label>
+        <input type="password" id="password2" placeholder="Şifreyi tekrar gir" required autocomplete="new-password">
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%">Kayıt Ol</button>
+    </form>
+    <div class="form-footer">Zaten hesabın var mı? <a href="login.html">Giriş Yap</a></div>
+  </div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CrackerVoid - Underground Topluluk</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="legal-bar">
+  ⚠ CrackerVoid yalnızca eğitim amaçlıdır. Paylaşılan içeriklerden yalnızca paylaşan kişi sorumludur. Site hiçbir hukuki sorumluluk kabul etmez. Kayıt olarak bu şartları kabul etmiş sayılırsın.
+</div>
+<nav class="navbar">
+  <a href="index.html" class="navbar-brand">Cracker<span>Void</span></a>
+  <button class="hamburger" id="hamburger-btn">☰</button>
+  <ul class="navbar-nav">
+    <li><a href="index.html" class="active">Ana Sayfa</a></li>
+    <li><a href="forum.html?cat=genel">Genel</a></li>
+    <li><a href="forum.html?cat=cracking">Cracking</a></li>
+    <li><a href="forum.html?cat=tools">Araçlar</a></li>
+    <li><a href="forum.html?cat=leaks">Leaks</a></li>
+    <li><a href="forum.html?cat=hesaplar">Hesaplar</a></li>
+    <li><a href="forum.html?cat=pazar">Pazar</a></li>
+    <li><a href="leaderboard.html">🏆 Liderlik</a></li>
+    <li><a href="store.html">🛒 Mağaza</a></li>
+    <li><a href="users.html">👥 Üyeler</a></li>
+  </ul>
+  <div id="nav-right" style="display:flex;align-items:center;gap:8px;"></div>
+</nav>
+
+<div class="hero">
+  <div class="hero-icon-wrap">
+    <svg class="hero-svg-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="32,4 60,56 4,56" stroke="#c0392b" stroke-width="3" fill="rgba(192,57,43,0.08)"/>
+      <line x1="32" y1="18" x2="32" y2="38" stroke="#c0392b" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="32" cy="46" r="2.5" fill="#c0392b"/>
+    </svg>
+  </div>
+  <h1><span class="hero-crack">Cracker</span><span class="hero-void">Void</span></h1>
+  <p>Underground topluluk &middot; G&uuml;venlik &middot; Ara&ccedil;lar &middot; Payla&#x15f;&#x131;m</p>
+</div>
+
+<div class="container">
+  <div class="home-layout">
+
+    <div class="home-left">
+      <div class="home-topbar">
+        <span class="home-topbar-title">&#x1f525; Son Konular</span>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <button class="btn btn-outline btn-sm" onclick="openSearchModal()">🔍 Ara</button>
+          <button class="btn btn-primary btn-sm" onclick="openPostModal()">&#x270f; Konu Paylaş</button>
+        </div>
+      </div>
+
+      <div class="home-cat-filter">
+        <a href="#" class="hcf-item active" data-cat="all">Tümü</a>
+        <a href="#" class="hcf-item" data-cat="genel" style="--cc:#3498db">Genel</a>
+        <a href="#" class="hcf-item" data-cat="cracking" style="--cc:#e74c3c">Cracking</a>
+        <a href="#" class="hcf-item" data-cat="tools" style="--cc:#e67e22">Araçlar</a>
+        <a href="#" class="hcf-item" data-cat="leaks" style="--cc:#1abc9c">Leaks</a>
+        <a href="#" class="hcf-item" data-cat="hesaplar" style="--cc:#9b59b6">Hesaplar</a>
+        <a href="#" class="hcf-item" data-cat="pazar" style="--cc:#f1c40f">Pazar</a>
+        <a href="#" class="hcf-item" data-cat="soru-cevap" style="--cc:#27ae60">Soru&amp;Cevap</a>
+        <a href="#" class="hcf-item" data-cat="duyurular" style="--cc:#c0392b">Duyurular</a>
+      </div>
+
+      <div id="home-thread-list"></div>
+
+      <div class="index-stats-box" style="margin-top:14px">
+        <div class="index-cat-title">&#x1f4ca; İSTATİSTİKLER</div>
+        <div class="index-stat-row"><span>&#x1f465; Üye</span><strong id="stat-members">0</strong></div>
+        <div class="index-stat-row"><span>&#x1f4cb; Konu</span><strong id="stat-threads">0</strong></div>
+        <div class="index-stat-row"><span>&#x1f4ac; Mesaj</span><strong id="stat-posts">0</strong></div>
+        <div class="index-stat-row"><span><span class="online-dot"></span>Çevrimiiçi</span><strong id="stat-online">0</strong></div>
+      </div>
+    </div>
+
+    <div class="home-right">
+      <!-- PARTNER BANNER -->
+      <a href="https://crackerlab.site" target="_blank" rel="noopener" class="partner-banner">
+        <div class="partner-logo-wrap">
+          <svg viewBox="0 0 100 100" width="52" height="52" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#7b6ef6"/>
+                <stop offset="100%" style="stop-color:#4a90e2"/>
+              </linearGradient>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="3" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <!-- L harfi - dikey -->
+            <polygon points="30,8 46,8 46,72 30,72" fill="url(#lg1)" filter="url(#glow)" opacity="0.95"/>
+            <!-- L harfi - yatay (3D perspektif) -->
+            <polygon points="30,72 72,72 72,86 30,86" fill="#d0d8ff" opacity="0.9"/>
+            <!-- 3D yan yüz -->
+            <polygon points="46,72 72,72 72,86 46,86" fill="#a0aacc" opacity="0.7"/>
+          </svg>
+        </div>
+        <div class="partner-info">
+          <div class="partner-label">Partner Site</div>
+          <div class="partner-name">CrackerLab</div>
+          <div class="partner-slogan">CrackerLab babadır</div>
+        </div>
+        <span class="partner-arrow">↗</span>
+      </a>
+
+      <div class="shoutbox">
+        <div class="shoutbox-header">&#x1f4ac; Sohbet</div>
+        <div class="shoutbox-input-area" id="shoutbox-input-area">
+          <div id="shoutbox-login-prompt" style="display:none"><a href="login.html">Giriş yap</a> veya <a href="register.html">kayıt ol</a></div>
+          <form id="shoutbox-form" style="display:none">
+            <div class="shoutbox-form-row">
+              <input type="text" id="shoutbox-msg" placeholder="Mesaj yaz..." maxlength="200" autocomplete="off">
+              <button type="submit" class="btn btn-primary btn-sm">Gönder</button>
+            </div>
+          </form>
+        </div>
+        <div class="shoutbox-messages" id="shoutbox-messages">
+          <div class="shoutbox-empty">Henüz mesaj yok.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- KONU PAYLAŞ MODAL -->
+<div id="post-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closePostModal()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span>&#x270f; Konu Paylaş</span>
+      <button class="modal-close" onclick="closePostModal()">&times;</button>
+    </div>
+    <div id="modal-alert" class="alert alert-error"></div>
+    <div class="form-group">
+      <label>Kategori</label>
+      <div class="modal-cat-grid" id="modal-cat-grid">
+        <button class="mcat-btn" data-cat="genel" style="--cc:#3498db">&#x1f4cb; Genel</button>
+        <button class="mcat-btn" data-cat="cracking" style="--cc:#e74c3c">&#x1f50d; Cracking</button>
+        <button class="mcat-btn" data-cat="tools" style="--cc:#e67e22">&#x1f6e0; Araçlar</button>
+        <button class="mcat-btn" data-cat="leaks" style="--cc:#1abc9c">&#x1f4a7; Leaks</button>
+        <button class="mcat-btn" data-cat="hesaplar" style="--cc:#9b59b6">&#x1f511; Hesaplar</button>
+        <button class="mcat-btn" data-cat="pazar" style="--cc:#f1c40f">&#x1f4b0; Pazar</button>
+        <button class="mcat-btn" data-cat="soru-cevap" style="--cc:#27ae60">&#x2753; Soru&amp;Cevap</button>
+        <button class="mcat-btn" data-cat="duyurular" style="--cc:#c0392b">&#x1f4e2; Duyurular</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Başlık</label>
+      <input type="text" id="modal-title" placeholder="Konu başlığı..." maxlength="120">
+    </div>
+    <div class="form-group">
+      <label>İçerik</label>
+      <textarea id="modal-content" placeholder="Konunu buraya yaz..." style="min-height:120px"></textarea>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <input type="checkbox" id="modal-hidden" style="width:auto;accent-color:var(--accent)">
+      <label for="modal-hidden" style="font-size:13px;cursor:pointer;margin:0;text-transform:none">&#x1f512; İçeriği gizle (like atarak görüntule)</label>
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="submitPost()">Konuyu Gönder</button>
+  </div>
+</div>
+
+<!-- GELİŞMİŞ ARAMA MODAL -->
+<div id="search-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box" style="max-width:640px">
+    <div class="modal-header">
+      <span>🔍 Gelişmiş Arama</span>
+      <button class="modal-close" onclick="document.getElementById('search-modal').style.display='none'">&times;</button>
+    </div>
+    <input type="text" id="search-query" class="search-page-input" placeholder="Konu başlığı veya içerik ara...">
+    <div class="search-filters">
+      <select id="search-cat">
+        <option value="all">Tüm Kategoriler</option>
+        <option value="genel">Genel</option>
+        <option value="cracking">Cracking</option>
+        <option value="tools">Araçlar</option>
+        <option value="leaks">Leaks</option>
+        <option value="hesaplar">Hesaplar</option>
+        <option value="pazar">Pazar</option>
+        <option value="soru-cevap">Soru&amp;Cevap</option>
+        <option value="duyurular">Duyurular</option>
+      </select>
+      <input type="text" id="search-author" placeholder="Yazar..." style="background:var(--bg2);border:1px solid var(--border2);border-radius:5px;padding:6px 12px;color:var(--text);font-size:13px;outline:none;width:140px">
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-bottom:14px" onclick="doSearch()">Ara</button>
+    <div id="search-results"></div>
+  </div>
+</div>
+
+<footer>&copy; 2026 <span>CrackerVoid</span> &middot; Tüm hakları saklıdır</footer>
+<script src="app.js"></script>
+<script>
+(function() {
+  var oldIds = [1,2,3,4,5,6,7,8,9,10,11];
+  if (!localStorage.getItem('cf_seed_cleaned')) {
+    var t = JSON.parse(localStorage.getItem('cf_threads') || '[]');
+    localStorage.setItem('cf_threads', JSON.stringify(t.filter(function(x){ return oldIds.indexOf(x.id) === -1; })));
+    localStorage.setItem('cf_seed_cleaned', '1');
+  }
+})();
+
+var CAT_COLORS = {
+  genel:'#3498db', cracking:'#e74c3c', tools:'#e67e22',
+  leaks:'#1abc9c', hesaplar:'#9b59b6', pazar:'#f1c40f',
+  'soru-cevap':'#27ae60', duyurular:'#c0392b'
+};
+var CAT_LABELS = {
+  genel:'Genel', cracking:'Cracking', tools:'Araçlar',
+  leaks:'Leaks', hesaplar:'Hesaplar', pazar:'Pazar',
+  'soru-cevap':'Soru&Cevap', duyurular:'Duyurular'
+};
+
+var currentFilter = 'all';
+var selectedCat = null;
+
+function renderHomeThreads(filter) {
+  var threads = Forum.getThreads();
+  if (filter && filter !== 'all') threads = threads.filter(function(t){ return t.cat === filter; });
+  threads = threads.slice(0, 40);
+  var el = document.getElementById('home-thread-list');
+  if (!threads.length) { el.innerHTML = '<div class="empty-msg">Henüz konu yok.</div>'; return; }
+  el.innerHTML = threads.map(function(t) {
+    var cc = CAT_COLORS[t.cat] || '#888';
+    var cl = CAT_LABELS[t.cat] || t.cat;
+    var likeCount = Forum.getLikes(t.id).length;
+    return '<a href="thread.html?id=' + t.id + '" class="home-thread-row">' +
+      '<div class="home-thread-left">' +
+        '<span class="home-cat-badge" style="background:' + cc + '22;color:' + cc + ';border-color:' + cc + '44">' + cl + '</span>' +
+        '<span class="home-thread-title">' + escHtml(t.title) + '</span>' +
+        '<span class="home-thread-meta">' + escHtml(t.author) + ' &middot; ' + t.date + '</span>' +
+      '</div>' +
+      '<div class="home-thread-right">' +
+        '<span class="home-thread-likes">&#x1f44d; ' + likeCount + '</span>' +
+        '<span class="home-thread-replies">&#x1f4ac; ' + t.replies + '</span>' +
+      '</div>' +
+    '</a>';
+  }).join('');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  renderHomeThreads('all');
+  Announce.showIfNew();
+  var user = Auth.current();
+  if (user) Badges.check(user.username);
+
+  document.querySelectorAll('.hcf-item').forEach(function(a) {
+    a.addEventListener('click', function(e) {
+      e.preventDefault();
+      document.querySelectorAll('.hcf-item').forEach(function(x){ x.classList.remove('active'); });
+      a.classList.add('active');
+      currentFilter = a.dataset.cat;
+      renderHomeThreads(currentFilter);
+    });
+  });
+
+  document.querySelectorAll('.mcat-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.mcat-btn').forEach(function(b){ b.classList.remove('selected'); });
+      btn.classList.add('selected');
+      selectedCat = btn.dataset.cat;
+    });
+  });
+});
+
+function openSearchModal() {
+  document.getElementById('search-modal').style.display = 'flex';
+  document.getElementById('search-results').innerHTML = '';
+  document.getElementById('search-query').value = '';
+  setTimeout(function(){ document.getElementById('search-query').focus(); }, 50);
+}
+
+function doSearch() {
+  var q = document.getElementById('search-query').value.trim();
+  var cat = document.getElementById('search-cat').value;
+  var author = document.getElementById('search-author').value.trim();
+  var results = advancedSearch(q, cat, author);
+  var el = document.getElementById('search-results');
+  if (!results.length) { el.innerHTML = '<div class="empty-msg">Sonuç bulunamadı.</div>'; return; }
+  el.innerHTML = results.slice(0,20).map(function(t) {
+    var cc = CAT_COLORS[t.cat] || '#888';
+    var cl = CAT_LABELS[t.cat] || t.cat;
+    return '<a href="thread.html?id=' + t.id + '" class="home-thread-row" style="margin-bottom:6px">' +
+      '<div class="home-thread-left">' +
+        '<span class="home-cat-badge" style="background:' + cc + '22;color:' + cc + ';border-color:' + cc + '44">' + cl + '</span>' +
+        '<span class="home-thread-title">' + escHtml(t.title) + '</span>' +
+        '<span class="home-thread-meta">' + escHtml(t.author) + ' · ' + t.date + '</span>' +
+      '</div>' +
+      '<div class="home-thread-right"><span class="home-thread-replies">💬 ' + t.replies + '</span></div>' +
+    '</a>';
+  }).join('');
+}
+
+function openPostModal() {
+  if (!Auth.current()) { window.location.href = 'login.html'; return; }
+  document.getElementById('post-modal').style.display = 'flex';
+  document.getElementById('modal-alert').style.display = 'none';
+  document.getElementById('modal-title').value = '';
+  document.getElementById('modal-content').value = '';
+  document.getElementById('modal-hidden').checked = false;
+  document.querySelectorAll('.mcat-btn').forEach(function(b){ b.classList.remove('selected'); });
+  selectedCat = null;
+}
+function closePostModal() {
+  document.getElementById('post-modal').style.display = 'none';
+}
+function submitPost() {
+  var title = document.getElementById('modal-title').value.trim();
+  var content = document.getElementById('modal-content').value.trim();
+  var hidden = document.getElementById('modal-hidden').checked;
+  var alertEl = document.getElementById('modal-alert');
+  if (!selectedCat) { alertEl.textContent = 'Kategori seçmelisin.'; alertEl.style.display='block'; return; }
+  if (!title) { alertEl.textContent = 'Başlık boş olamaz.'; alertEl.style.display='block'; return; }
+  if (!content) { alertEl.textContent = 'İçerik boş olamaz.'; alertEl.style.display='block'; return; }
+  var id = Forum.addThread(selectedCat, title, content, hidden);
+  closePostModal();
+  window.location.href = 'thread.html?id=' + id;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Liderlik Tablosu - CrackerVoid</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="legal-bar">
+  ⚠ CrackerVoid yalnızca eğitim amaçlıdır. Paylaşılan içeriklerden yalnızca paylaşan kişi sorumludur. Site hiçbir hukuki sorumluluk kabul etmez. Kayıt olarak bu şartları kabul etmiş sayılırsın.
+</div>
+<nav class="navbar">
+  <a href="index.html" class="navbar-brand">Cracker<span>Void</span></a>
+  <button class="hamburger" id="hamburger-btn">☰</button>
+  <ul class="navbar-nav">
+    <li><a href="index.html">Ana Sayfa</a></li>
+    <li><a href="leaderboard.html" class="active">Liderlik</a></li>
+    <li><a href="users.html">👥 Üyeler</a></li>
+  </ul>
+  <div id="nav-right" style="display:flex;align-items:center;gap:8px;"></div>
+</nav>
+<div class="container" style="max-width:900px">
+  <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+    <button class="lb-tab-btn active" data-tab="money">💰 En Zengin</button>
+    <button class="lb-tab-btn" data-tab="posts">💬 En Aktif</button>
+    <button class="lb-tab-btn" data-tab="threads">📋 En Çok Konu</button>
+    <button class="lb-tab-btn" data-tab="likes">👍 En Çok Like</button>
+  </div>
+  <div id="lb-list"></div>
+</div>
+<footer>&copy; 2026 <span>CrackerVoid</span></footer>
+<script src="app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  let currentTab = 'money';
+  renderLB(currentTab);
+  document.querySelectorAll('.lb-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.lb-tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentTab = btn.dataset.tab;
+      renderLB(currentTab);
+    });
+  });
+});
+
+function renderLB(tab) {
+  const users = Auth.getUsers();
+  const threads = Forum.getThreads();
+  const likes = JSON.parse(localStorage.getItem('cf_likes') || '{}');
+
+  let sorted = users.map(u => {
+    const totalLikes = threads.filter(t => t.author === u.username).reduce((s, t) => s + (likes[t.id] || []).length, 0);
+    return {
+      username: u.username,
+      money: Money.get(u.username),
+      posts: u.posts || 0,
+      threadCount: threads.filter(t => t.author === u.username).length,
+      likes: totalLikes,
+      avatarImg: u.avatarImg,
+      avatarColor: u.avatarColor
+    };
+  });
+
+  if (tab === 'money')   sorted.sort((a,b) => b.money - a.money);
+  if (tab === 'posts')   sorted.sort((a,b) => b.posts - a.posts);
+  if (tab === 'threads') sorted.sort((a,b) => b.threadCount - a.threadCount);
+  if (tab === 'likes')   sorted.sort((a,b) => b.likes - a.likes);
+
+  sorted = sorted.slice(0, 20);
+  const medals = ['🥇','🥈','🥉'];
+  const valMap = { money: u => '💰 ' + u.money, posts: u => '💬 ' + u.posts, threads: u => '📋 ' + u.threadCount, likes: u => '👍 ' + u.likes };
+
+  const el = document.getElementById('lb-list');
+  if (!sorted.length) { el.innerHTML = '<div class="empty-msg">Henüz üye yok.</div>'; return; }
+  el.innerHTML = sorted.map((u, i) => {
+    const rank = getRank(u.username);
+    const av = u.avatarImg
+      ? `<img src="${u.avatarImg}" style="width:40px;height:40px;border-radius:50%;object-fit:cover">`
+      : `<div style="width:40px;height:40px;border-radius:50%;background:${rank.color};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff">${escHtml(u.username[0].toUpperCase())}</div>`;
+    const medal = medals[i] || `<span style="font-size:13px;color:var(--text3);font-weight:700">#${i+1}</span>`;
+    return `<div class="lb-row${i < 3 ? ' lb-top' : ''}">
+      <div class="lb-rank">${medal}</div>
+      ${av}
+      <div style="flex:1;min-width:0">
+        <a href="profile.html?u=${escHtml(u.username)}" style="font-size:14px;font-weight:700;color:${rank.color}">${escHtml(u.username)}</a>
+        <div style="font-size:11px;color:var(--text3)">${rank.icon} ${rank.name}</div>
+      </div>
+      <div style="font-size:15px;font-weight:800;color:var(--accent)">${valMap[tab](u)}</div>
+    </div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>

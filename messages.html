@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mesajlar - CrackerVoid</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="legal-bar">
+  ⚠ CrackerVoid yalnızca eğitim amaçlıdır. Paylaşılan içeriklerden yalnızca paylaşan kişi sorumludur. Site hiçbir hukuki sorumluluk kabul etmez. Kayıt olarak bu şartları kabul etmiş sayılırsın.
+</div>
+
+<nav class="navbar">
+  <a href="index.html" class="navbar-brand">Cracker<span>Void</span></a>
+  <button class="hamburger" id="hamburger-btn">☰</button>
+  <ul class="navbar-nav">
+    <li><a href="index.html">Ana Sayfa</a></li>
+  </ul>
+  <div id="nav-right" style="display:flex;align-items:center;gap:8px;"></div>
+</nav>
+<div class="container">
+  <div class="dm-layout">
+    <div class="dm-sidebar">
+      <div class="dm-sidebar-header">✉ Mesajlar</div>
+      <div id="dm-inbox"></div>
+    </div>
+    <div class="dm-main" id="dm-main">
+      <div class="dm-empty">Sol taraftan bir konuşma seç veya profil sayfasından mesaj gönder.</div>
+    </div>
+  </div>
+</div>
+<footer>© 2026 <span>CrackerVoid</span></footer>
+<script src="app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  if (!Auth.require()) return;
+  const currentUser = Auth.current();
+  const params = new URLSearchParams(location.search);
+  const targetU = params.get('u');
+
+  function renderInbox() {
+    const inbox = DM.getInbox(currentUser.username);
+    const el = document.getElementById('dm-inbox');
+    if (!inbox.length) { el.innerHTML = '<div style="padding:16px;font-size:13px;color:var(--text3)">Henüz mesaj yok.</div>'; return; }
+    el.innerHTML = inbox.map(c => {
+      const u = Auth.getUsers().find(x => x.username === c.with);
+      const rank = getRank(c.with);
+      const avHtml = u && u.avatarImg
+        ? `<img src="${u.avatarImg}" style="width:32px;height:32px;border-radius:50%;object-fit:cover">`
+        : `<div style="width:32px;height:32px;border-radius:50%;background:${rank.color};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0">${escHtml(c.with[0].toUpperCase())}</div>`;
+      return `<div class="dm-inbox-item" onclick="openConvo('${escHtml(c.with)}')">
+        ${avHtml}
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:700;color:${rank.color}">${escHtml(c.with)}</div>
+          <div style="font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(c.last.msg)}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  window.openConvo = function(username) {
+    const msgs = DM.get(currentUser.username, username);
+    const u = Auth.getUsers().find(x => x.username === username);
+    const rank = getRank(username);
+    document.getElementById('dm-main').innerHTML = `
+      <div class="dm-convo-header">
+        <a href="profile.html?u=${escHtml(username)}" style="color:${rank.color};font-weight:700">${escHtml(username)}</a>
+      </div>
+      <div class="dm-messages" id="dm-messages">
+        ${msgs.length ? msgs.map(m => `
+          <div class="dm-msg ${m.from === currentUser.username ? 'dm-msg-mine' : 'dm-msg-theirs'}">
+            <div class="dm-msg-text">${escHtml(m.msg)}</div>
+            <div class="dm-msg-time">${m.time}</div>
+          </div>`).join('') : '<div style="text-align:center;color:var(--text3);font-size:13px;padding:20px">Henüz mesaj yok.</div>'}
+      </div>
+      <form class="dm-form" id="dm-form">
+        <input type="text" id="dm-input" placeholder="${escHtml(username)} kişisine mesaj yaz..." maxlength="500" autocomplete="off">
+        <button type="submit" class="btn btn-primary btn-sm">Gönder</button>
+      </form>`;
+    const msgEl = document.getElementById('dm-messages');
+    msgEl.scrollTop = msgEl.scrollHeight;
+    document.getElementById('dm-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const msg = document.getElementById('dm-input').value.trim();
+      if (!msg) return;
+      DM.send(currentUser.username, username, msg);
+      document.getElementById('dm-input').value = '';
+      openConvo(username);
+      renderInbox();
+    });
+  };
+
+  renderInbox();
+  if (targetU) openConvo(targetU);
+});
+</script>
+</body>
+</html>

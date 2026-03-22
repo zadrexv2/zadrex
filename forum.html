@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forum - CrackerVoid</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="legal-bar">
+  ⚠ CrackerVoid yalnızca eğitim amaçlıdır. Paylaşılan içeriklerden yalnızca paylaşan kişi sorumludur. Site hiçbir hukuki sorumluluk kabul etmez. Kayıt olarak bu şartları kabul etmiş sayılırsın.
+</div>
+
+<nav class="navbar">
+  <a href="index.html" class="navbar-brand">Cracker<span>Void</span></a>
+  <button class="hamburger" id="hamburger-btn">☰</button>
+  <ul class="navbar-nav">
+    <li><a href="index.html">Ana Sayfa</a></li>
+    <li><a href="forum.html?cat=genel">Genel</a></li>
+    <li><a href="forum.html?cat=cracking">Cracking</a></li>
+    <li><a href="forum.html?cat=tools">Araçlar</a></li>
+    <li><a href="forum.html?cat=leaks">Leaks</a></li>
+    <li><a href="forum.html?cat=hesaplar">Hesaplar</a></li>
+    <li><a href="forum.html?cat=pazar">Pazar</a></li>
+    <li><a href="leaderboard.html">🏆 Liderlik</a></li>
+    <li><a href="users.html">👥 Üyeler</a></li>
+  </ul>
+  <div id="nav-right" style="display:flex;align-items:center;gap:8px;"></div>
+</nav>
+
+<div class="container">
+  <div class="page-grid">
+    <div>
+      <div class="breadcrumb">
+        <a href="index.html">Ana Sayfa</a>
+        <span>›</span>
+        <span id="cat-label">Forum</span>
+      </div>
+
+      <!-- Yeni konu: login varsa form, yoksa prompt -->
+      <div id="new-thread-area"></div>
+
+      <!-- Thread listesi -->
+      <div class="thread-list" id="thread-list">
+        <div class="empty-msg">Yükleniyor...</div>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div>
+      <div class="sidebar-box">
+        <h4>Kategoriler</h4>
+        <ul>
+          <li><a href="forum.html?cat=genel">Genel Tartışma</a></li>
+          <li><a href="forum.html?cat=soru-cevap">Soru &amp; Cevap</a></li>
+          <li><a href="forum.html?cat=duyurular">Duyurular</a></li>
+          <li><a href="forum.html?cat=cracking">Cracking / Pentest</a></li>
+          <li><a href="forum.html?cat=tools">Araçlar</a></li>
+          <li><a href="forum.html?cat=leaks">Leaks</a></li>
+          <li><a href="forum.html?cat=hesaplar">Hesap Paylaşımları</a></li>
+          <li><a href="forum.html?cat=pazar">Pazar</a></li>
+        </ul>
+      </div>
+      <div class="sidebar-box" id="sb-stats">
+        <h4>İstatistikler</h4>
+        <ul>
+          <li>Konular: <span id="sb-threads">-</span></li>
+          <li>Mesajlar: <span id="sb-posts">-</span></li>
+          <li>Üyeler: <span id="sb-members">-</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>&copy; 2026 <span>CrackerVoid</span></footer>
+<script src="app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(location.search);
+  const cat = params.get('cat') || 'genel';
+  const labels = { genel:'Genel Tartışma', 'soru-cevap':'Soru & Cevap', duyurular:'Duyurular', cracking:'Cracking / Pentest', tools:'Araçlar & Yazılımlar', leaks:'Leaks / Releases', hesaplar:'Hesap Paylaşımları', pazar:'Pazar' };
+  const label = labels[cat] || cat;
+  document.getElementById('cat-label').textContent = label;
+  document.title = label + ' - CrackerVoid';
+
+  // Aktif nav
+  document.querySelectorAll('.navbar-nav a').forEach(a => {
+    if (a.href.includes('cat=' + cat)) a.classList.add('active');
+  });
+
+  // Sidebar stats
+  const s = Forum.stats();
+  document.getElementById('sb-threads').textContent = s.threads;
+  document.getElementById('sb-posts').textContent = s.posts;
+  document.getElementById('sb-members').textContent = s.members;
+
+  // Thread listesi
+  renderThreads('thread-list', Forum.getByCategory(cat));
+
+  // Yeni konu alanı
+  const area = document.getElementById('new-thread-area');
+  const user = Auth.current();
+  if (user) {
+    area.innerHTML = `
+      <div class="new-thread-box">
+        <h3>&#x270F; Yeni Konu Aç</h3>
+        <div id="thread-alert" class="alert alert-error"></div>
+        <div id="thread-success" class="alert alert-success"></div>
+        <form id="new-thread-form">
+          <div class="form-group">
+            <label>Başlık</label>
+            <input type="text" id="thread-title" placeholder="Konu başlığı..." required>
+          </div>
+          <div class="form-group">
+            <label>İçerik</label>
+            <textarea id="thread-content" placeholder="Konunu buraya yaz..." required></textarea>
+          </div>
+          <div class="form-group" style="display:flex;align-items:center;gap:10px">
+            <input type="checkbox" id="thread-hidden" style="width:auto;accent-color:var(--accent)">
+            <label for="thread-hidden" style="text-transform:none;font-size:13px;cursor:pointer;margin:0">🔒 İçeriği gizle (like atarak görüntüle)</label>
+          </div>
+          <button type="submit" class="btn btn-primary">Konuyu Gönder</button>
+        </form>
+      </div>`;
+
+    document.getElementById('new-thread-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const title = document.getElementById('thread-title').value.trim();
+      const content = document.getElementById('thread-content').value.trim();
+      const hidden = document.getElementById('thread-hidden').checked;
+      if (!title || !content) return showAlert('thread-alert', 'Başlık ve içerik boş olamaz.');
+      const id = Forum.addThread(cat, title, content, hidden);
+      document.getElementById('new-thread-form').reset();
+      renderThreads('thread-list', Forum.getByCategory(cat));
+      showAlert('thread-success', 'Konu başarıyla oluşturuldu!', 'success');
+      document.getElementById('thread-alert').style.display = 'none';
+      // Konuya git
+      setTimeout(() => { window.location.href = 'thread.html?id=' + id; }, 800);
+    });
+  } else {
+    area.innerHTML = `<div class="login-prompt">Konu açmak için <a href="login.html?r=${encodeURIComponent(location.href)}">giriş yap</a> veya <a href="register.html">kayıt ol</a>.</div>`;
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Konu - CrackerVoid</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- YASAL UYARI BANNER (sabit üst) -->
+<div class="legal-bar">
+  ⚠ CrackerVoid yalnızca eğitim amaçlıdır. Paylaşılan içeriklerden yalnızca paylaşan kişi sorumludur. Site hiçbir hukuki sorumluluk kabul etmez. Kayıt olarak bu şartları kabul etmiş sayılırsın.
+</div>
+
+<nav class="navbar">
+  <a href="index.html" class="navbar-brand">Cracker<span>Void</span></a>
+  <button class="hamburger" id="hamburger-btn">☰</button>
+  <ul class="navbar-nav">
+    <li><a href="index.html">Ana Sayfa</a></li>
+    <li><a href="forum.html?cat=genel">Genel</a></li>
+    <li><a href="forum.html?cat=cracking">Cracking</a></li>
+    <li><a href="forum.html?cat=tools">Araçlar</a></li>
+    <li><a href="forum.html?cat=leaks">Leaks</a></li>
+    <li><a href="forum.html?cat=pazar">Pazar</a></li>
+    <li><a href="leaderboard.html">🏆 Liderlik</a></li>
+    <li><a href="users.html">👥 Üyeler</a></li>
+  </ul>
+  <div id="nav-right" style="display:flex;align-items:center;gap:8px;"></div>
+</nav>
+
+<div class="container">
+  <div class="breadcrumb" id="breadcrumb">
+    <a href="index.html">Ana Sayfa</a><span>›</span>
+    <a href="forum.html" id="bc-cat">Forum</a><span>›</span>
+    <span id="bc-title">Konu</span>
+  </div>
+  <div class="thread-page-header" id="thread-header"><div class="empty-msg">Yükleniyor...</div></div>
+  <div id="posts-container"></div>
+  <div id="reply-area"></div>
+</div>
+
+<!-- LIKE POPUP -->
+<div id="like-popup" class="like-popup" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="like-popup-box">
+    <div class="like-popup-header">
+      <span>👍 Like Atanlar</span>
+      <button onclick="document.getElementById('like-popup').style.display='none'" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer">×</button>
+    </div>
+    <div id="like-popup-list"></div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div id="edit-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeEditModal()">
+  <div class="modal-box">
+    <div class="modal-header"><span>✏ Düzenle</span><button class="modal-close" onclick="closeEditModal()">×</button></div>
+    <input type="hidden" id="edit-type">
+    <input type="hidden" id="edit-id">
+    <div id="edit-title-wrap" class="form-group"><label>Başlık</label><input type="text" id="edit-title-input"></div>
+    <div class="form-group"><label>İçerik</label><textarea id="edit-content-input" style="min-height:120px"></textarea></div>
+    <button class="btn btn-primary" style="width:100%" onclick="submitEdit()">Kaydet</button>
+  </div>
+</div>
+
+<footer>© 2026 <span>CrackerVoid</span></footer>
+<script src="app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id');
+  if (!id) { window.location.href = 'index.html'; return; }
+
+  const thread = Forum.getThread(id);
+  if (!thread) { document.getElementById('thread-header').innerHTML = '<div class="empty-msg">Konu bulunamadı.</div>'; return; }
+
+  Forum.incViews(id);
+
+  const catLabels = { genel:'Genel Tartışma', 'soru-cevap':'Soru & Cevap', duyurular:'Duyurular', cracking:'Cracking / Pentest', tools:'Araçlar', leaks:'Leaks', pazar:'Pazar', hesaplar:'Hesap Paylaşımları' };
+  document.title = thread.title + ' - CrackerVoid';
+  document.getElementById('bc-cat').href = 'forum.html?cat=' + thread.cat;
+  document.getElementById('bc-cat').textContent = catLabels[thread.cat] || thread.cat;
+  document.getElementById('bc-title').textContent = thread.title;
+
+  function renderHeader() {
+    const t = Forum.getThread(id);
+    const currentUser = Auth.current();
+    const isAdmin = currentUser && Forum._isAdmin(currentUser.username);
+    const adminBtns = isAdmin ? `
+      <button class="btn btn-outline btn-sm" onclick="doPin()" style="font-size:11px">${t.pinned ? '📌 Sabiti Kaldır' : '📌 Sabitle'}</button>
+      <button class="btn btn-outline btn-sm" onclick="doLock()" style="font-size:11px">${t.locked ? '🔓 Kilidi Aç' : '🔒 Kilitle'}</button>` : '';
+    document.getElementById('thread-header').innerHTML = `
+      <h1>${escHtml(t.title)}${t.edited ? ' <span style="font-size:11px;color:var(--text3)">(düzenlendi)</span>' : ''}</h1>
+      <div class="thread-page-meta">
+        <span>Yazan: <strong><a href="profile.html?u=${escHtml(t.author)}" style="color:var(--text2)">${escHtml(t.author)}</a></strong></span>
+        <span>${t.date}</span>
+        <span>${t.replies} yanıt</span>
+        <span>${t.views} görüntülenme</span>
+        ${t.locked ? '<span style="color:#e74c3c;font-weight:700">🔒 KİLİTLİ</span>' : ''}
+        ${adminBtns}
+      </div>`;
+  }
+  renderHeader();
+
+  function renderPosts() {
+    const replies = Forum.getRepliesFor(id);
+    const users = Auth.getUsers();
+    const currentUser = Auth.current();
+
+    function reactionBar(postId) {
+      return `<div class="reaction-bar">${REACTION_LIST.map(e => {
+        const data = Reactions.get(postId);
+        const count = (data[e] || []).length;
+        const active = Reactions.hasReacted(postId, e);
+        return `<button class="react-btn${active?' active':''}" onclick="doReact('${postId}','${e}')">${e}${count>0?' '+count:''}</button>`;
+      }).join('')}</div>`;
+    }
+
+    function postHtml(author, content, date, isOP, postId, quoteOf, postNum) {
+      const authorUser = users.find(u => u.username === author);
+      const rank = getRank(author);
+      const money = Money.get(author);
+      const posts = authorUser ? (authorUser.posts || 0) : 0;
+      const joined = authorUser ? (authorUser.joined || '-') : '-';
+      const likeCount = isOP ? Forum.getLikes(thread.id).length : 0;
+      const liked = isOP ? Forum.hasLiked(thread.id) : false;
+      const canEdit = currentUser && (currentUser.username === author || Forum._isAdmin(currentUser.username));
+
+      // Avatar
+      const avSize = 80;
+      const avHtml = authorUser && authorUser.avatarImg
+        ? `<img src="${authorUser.avatarImg}" class="post-av-img">`
+        : `<div class="post-av-letter" style="background:${rank.color}">${escHtml(author[0].toUpperCase())}</div>`;
+
+      // İçerik
+      let contentHtml;
+      if (isOP && thread.hidden) {
+        const hasLiked = Forum.hasLiked(thread.id);
+        if (hasLiked || (currentUser && currentUser.username === thread.author)) {
+          contentHtml = `<div class="post-text">${escHtml(content)}</div>`;
+        } else {
+          contentHtml = `<div class="hidden-content-wrap">
+            <div class="hidden-content-blur">${escHtml(content)}</div>
+            <div class="hidden-content-overlay">
+              <span>🔒 Bu içerik gizlidir</span><p>Görüntülemek için like at</p>
+              ${currentUser ? `<button class="btn btn-primary btn-sm" onclick="doLike()">👍 Like At ve Gör</button>` : `<a href="login.html?r=${encodeURIComponent(location.href)}" class="btn btn-primary btn-sm">Giriş Yap</a>`}
+            </div></div>`;
+        }
+      } else {
+        contentHtml = `<div class="post-text">${escHtml(content)}</div>`;
+      }
+
+      const quoteHtml = quoteOf ? `<div class="quote-block">↩ <strong>${escHtml(quoteOf.author)}</strong>: ${escHtml(quoteOf.content.substring(0,120))}${quoteOf.content.length>120?'...':''}</div>` : '';
+
+      const editBtn   = canEdit ? `<button class="action-mini-btn" onclick="openEditModal('${isOP?'thread':'reply'}','${postId}',${JSON.stringify(isOP?thread.title:'').replace(/"/g,"'")},${JSON.stringify(content).replace(/"/g,"'")})">✏ Düzenle</button>` : '';
+      const deleteBtn = canEdit ? (isOP ? `<button class="delete-btn" onclick="doDeleteThread()">🗑 Sil</button>` : `<button class="delete-btn" onclick="doDeleteReply(${postId})">🗑 Sil</button>`) : '';
+      const quoteBtn  = currentUser ? `<button class="action-mini-btn" onclick="setQuote(${postId})">↩ Alıntıla</button>` : '';
+      const dmBtn     = currentUser && currentUser.username !== author ? `<a href="messages.html?u=${escHtml(author)}" class="action-mini-btn">✉ DM</a>` : '';
+
+      // Like butonu — tıklayınca popup
+      const likeBtn = isOP ? `
+        <button class="like-btn${liked?' liked':''}" onclick="doLike()">👍 <span id="like-count">${likeCount}</span> Beğen</button>
+        <button class="like-who-btn" onclick="showLikePopup()" title="Kimlerin beğendiğini gör">👁 ${likeCount}</button>` : '';
+
+      const saveBtn = isOP && currentUser ? (() => {
+        const isSaved = Saved.has(currentUser.username, thread.id);
+        return `<button class="save-btn${isSaved?' saved':''}" onclick="doSave()" title="${isSaved?'Kaydedildi':'Kaydet'}">🔖 ${isSaved?'Kaydedildi':'Kaydet'}</button>`;
+      })() : '';
+
+      return `<div class="post-box2">
+        <!-- SOL: KULLANICI KARTI -->
+        <div class="post-user-card">
+          <a href="profile.html?u=${escHtml(author)}" class="post-av-wrap">${avHtml}</a>
+          <a href="profile.html?u=${escHtml(author)}" class="post-uname" style="color:${rank.nameColor || rank.color}">${escHtml(author)}${rank.customTitle ? ` <span style="font-size:10px;background:rgba(255,255,255,.08);border-radius:3px;padding:1px 5px;color:${rank.nameColor || rank.color};border:1px solid ${rank.nameColor || rank.color}44">${escHtml(rank.customTitle)}</span>` : ''}</a>
+          <div class="post-rank-badge" style="background:${rank.color}22;color:${rank.color};border-color:${rank.color}55">${rank.icon} ${rank.name}</div>
+          <div class="post-user-stats">
+            <div class="pus-row"><span>📅 Katılım</span><strong>${joined}</strong></div>
+            <div class="pus-row"><span>💬 Mesaj</span><strong>${posts}</strong></div>
+            <div class="pus-row"><span>💰 Para</span><strong style="color:#2ecc71">${money}</strong></div>
+            <div class="pus-row"><span>👍 Like</span><strong style="color:var(--accent)">${isOP ? likeCount : '-'}</strong></div>
+          </div>
+          ${dmBtn ? `<div style="margin-top:10px">${dmBtn}</div>` : ''}
+        </div>
+        <!-- SAĞ: İÇERİK -->
+        <div class="post-body">
+          <div class="post-body-top">
+            <span class="post-body-date">${date}</span>
+            <span class="post-body-num">#${postNum}</span>
+          </div>
+          ${quoteHtml}
+          ${contentHtml}
+          ${reactionBar(postId)}
+          <div class="post-body-actions">
+            ${likeBtn}
+            ${saveBtn}
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-left:auto">
+              ${quoteBtn}${editBtn}${deleteBtn}
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    let html = postHtml(thread.author, thread.content, thread.date, true, thread.id, null, 1);
+    replies.forEach((r, i) => {
+      let quoteOf = null;
+      if (r.quoteOf) {
+        const qr = replies.find(x => x.id == r.quoteOf) || (thread.id == r.quoteOf ? { author: thread.author, content: thread.content } : null);
+        if (qr) quoteOf = qr;
+      }
+      html += postHtml(r.author, r.content, r.date, false, r.id, quoteOf, i + 2);
+    });
+    document.getElementById('posts-container').innerHTML = html;
+  }
+
+  renderPosts();
+
+  window.doLike = function() {
+    if (!Auth.current()) { window.location.href = 'login.html?r=' + encodeURIComponent(location.href); return; }
+    Forum.toggleLike(id);
+    renderPosts();
+  };
+
+  window.doSave = function() {
+    if (!Auth.current()) return;
+    const isSaved = Saved.toggle(Auth.current().username, id);
+    renderPosts();
+  };
+
+  window.showLikePopup = function() {
+    const likes = Forum.getLikes(id);
+    const users = Auth.getUsers();
+    const popup = document.getElementById('like-popup');
+    const list = document.getElementById('like-popup-list');
+    if (!likes.length) {
+      list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3)">Henüz like atan yok.</div>';
+    } else {
+      list.innerHTML = likes.map(username => {
+        const u = users.find(x => x.username === username);
+        const rank = getRank(username);
+        const avHtml = u && u.avatarImg
+          ? `<img src="${u.avatarImg}" style="width:32px;height:32px;border-radius:50%;object-fit:cover">`
+          : `<div style="width:32px;height:32px;border-radius:50%;background:${rank.color};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff">${escHtml(username[0].toUpperCase())}</div>`;
+        return `<a href="profile.html?u=${escHtml(username)}" class="like-popup-row">
+          ${avHtml}
+          <div>
+            <div style="font-size:13px;font-weight:700;color:${rank.color}">${escHtml(username)}</div>
+            <div style="font-size:11px;color:var(--text3)">${rank.icon} ${rank.name}</div>
+          </div>
+        </a>`;
+      }).join('');
+    }
+    popup.style.display = 'flex';
+  };
+
+  window.doReact = function(postId, emoji) {
+    if (!Auth.current()) { window.location.href = 'login.html'; return; }
+    Reactions.toggle(postId, emoji);
+    renderPosts();
+  };
+
+  window.doDeleteThread = function() {
+    if (!confirm('Konuyu silmek istediğine emin misin?')) return;
+    if (Forum.deleteThread(id)) window.location.href = 'index.html';
+  };
+
+  window.doDeleteReply = function(replyId) {
+    if (!confirm('Yanıtı silmek istediğine emin misin?')) return;
+    if (Forum.deleteReply(replyId)) renderPosts();
+  };
+
+  window.doPin = function() { Forum.togglePin(id); renderHeader(); };
+  window.doLock = function() { Forum.toggleLock(id); renderHeader(); renderPosts(); renderReplyArea(); };
+
+  window.openEditModal = function(type, postId, title, content) {
+    document.getElementById('edit-type').value = type;
+    document.getElementById('edit-id').value = postId;
+    document.getElementById('edit-title-wrap').style.display = type === 'thread' ? 'block' : 'none';
+    document.getElementById('edit-title-input').value = title || '';
+    document.getElementById('edit-content-input').value = content || '';
+    document.getElementById('edit-modal').style.display = 'flex';
+  };
+  window.closeEditModal = function() { document.getElementById('edit-modal').style.display = 'none'; };
+
+  window.submitEdit = function() {
+    const type = document.getElementById('edit-type').value;
+    const postId = document.getElementById('edit-id').value;
+    const content = document.getElementById('edit-content-input').value.trim();
+    if (!content) return;
+    if (type === 'thread') {
+      const title = document.getElementById('edit-title-input').value.trim();
+      if (!title) return;
+      Forum.editThread(postId, title, content);
+      document.getElementById('bc-title').textContent = title;
+    } else {
+      Forum.editReply(postId, content);
+    }
+    closeEditModal(); renderPosts(); renderHeader();
+  };
+
+  let quoteId = null;
+  window.setQuote = function(replyId) {
+    quoteId = replyId;
+    const r = Forum.getRepliesFor(id).find(x => x.id == replyId);
+    const ta = document.getElementById('reply-content');
+    if (ta && r) { ta.placeholder = '↩ ' + r.author + ' alıntılanıyor...'; ta.focus(); }
+  };
+
+  function renderReplyArea() {
+    const replyArea = document.getElementById('reply-area');
+    const user = Auth.current();
+    const t = Forum.getThread(id);
+    if (t && t.locked && !(user && Forum._isAdmin(user.username))) {
+      replyArea.innerHTML = `<div class="login-prompt" style="margin-top:16px">🔒 Bu konu kilitlenmiştir.</div>`; return;
+    }
+    if (user) {
+      replyArea.innerHTML = `<div class="reply-box">
+        <h3>💬 Yanıt Yaz</h3>
+        <div id="reply-alert" class="alert alert-error"></div>
+        <form id="reply-form">
+          <div class="form-group"><textarea id="reply-content" placeholder="Yanıtını buraya yaz..." required></textarea></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button type="submit" class="btn btn-primary">Yanıtla</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="quoteId=null;document.getElementById('reply-content').placeholder='Yanıtını buraya yaz...'">Alıntıyı Temizle</button>
+          </div>
+        </form>
+      </div>`;
+      document.getElementById('reply-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const content = document.getElementById('reply-content').value.trim();
+        if (!content) return showAlert('reply-alert', 'Yanıt boş olamaz.');
+        const ok = Forum.addReply(id, content, quoteId);
+        if (!ok) return showAlert('reply-alert', 'Konu kilitli.');
+        quoteId = null;
+        document.getElementById('reply-form').reset();
+        document.getElementById('reply-content').placeholder = 'Yanıtını buraya yaz...';
+        document.getElementById('reply-alert').style.display = 'none';
+        renderPosts();
+      });
+    } else {
+      replyArea.innerHTML = `<div class="login-prompt" style="margin-top:16px">Yanıt yazmak için <a href="login.html?r=${encodeURIComponent(location.href)}">giriş yap</a> veya <a href="register.html">kayıt ol</a>.</div>`;
+    }
+  }
+  renderReplyArea();
+});
+</script>
+</body>
+</html>
