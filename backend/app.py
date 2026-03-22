@@ -1,11 +1,19 @@
-from flask import Flask, request, jsonify, session
+from flask import Flask, request, jsonify, session, send_from_directory
 from flask_cors import CORS
 import sqlite3, hashlib, os, time
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='..', static_url_path='')
 app.secret_key = 'crackervoid_secret_2026'
 CORS(app, supports_credentials=True, origins='*')
 DB = os.path.join(os.path.dirname(__file__), 'cv.db')
+
+@app.route('/')
+def index():
+    return send_from_directory('..', 'index.html')
+
+@app.route('/<path:path>')
+def static_files(path):
+    return send_from_directory('..', path)
 
 def get_db():
     con = sqlite3.connect(DB)
