@@ -7,8 +7,6 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<!-- YASAL UYARI BANNER (sabit üst) -->
 <div class="legal-bar">
   ⚠ CrackerVoid yalnızca eğitim amaçlıdır. Paylaşılan içeriklerden yalnızca paylaşan kişi sorumludur. Site hiçbir hukuki sorumluluk kabul etmez. Kayıt olarak bu şartları kabul etmiş sayılırsın.
 </div>
@@ -64,285 +62,318 @@
 </div>
 
 <footer>© 2026 <span>CrackerVoid</span></footer>
-<script src="app.js"></script>
+<script src="api.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+const REACTION_LIST = ['👍','❤️','😂','😮','😢','🔥'];
+let _thread = null, _replies = [], _currentUser = null, _likeData = {}, _quoteId = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(location.search);
   const id = params.get('id');
   if (!id) { window.location.href = 'index.html'; return; }
 
-  const thread = Forum.getThread(id);
-  if (!thread) { document.getElementById('thread-header').innerHTML = '<div class="empty-msg">Konu bulunamadı.</div>'; return; }
+  _currentUser = await Auth.init();
+
+  // Navbar
+  const navRight = document.getElementById('nav-right');
+  if (_currentUser) {
+    navRight.innerHTML = `<a href="notifications.html" class="btn btn-outline btn-sm">🔔</a>
+      <a href="messages.html" class="btn btn-outline btn-sm">✉</a>
+      <a href="profile.html" class="btn btn-outline btn-sm">${escHtml(_currentUser.username)}</a>
+      <button class="btn btn-outline btn-sm" onclick="Auth.logout()">Çıkış</button>`;
+  } else {
+    navRight.innerHTML = `<a href="login.html" class="btn btn-outline btn-sm">Giriş</a>
+      <a href="register.html" class="btn btn-primary btn-sm">Kayıt Ol</a>`;
+  }
+
+  _thread = await Forum.getThread(id);
+  if (!_thread) { document.getElementById('thread-header').innerHTML = '<div class="empty-msg">Konu bulunamadı.</div>'; return; }
 
   Forum.incViews(id);
 
   const catLabels = { genel:'Genel Tartışma', 'soru-cevap':'Soru & Cevap', duyurular:'Duyurular', cracking:'Cracking / Pentest', tools:'Araçlar', leaks:'Leaks', pazar:'Pazar', hesaplar:'Hesap Paylaşımları' };
-  document.title = thread.title + ' - CrackerVoid';
-  document.getElementById('bc-cat').href = 'forum.html?cat=' + thread.cat;
-  document.getElementById('bc-cat').textContent = catLabels[thread.cat] || thread.cat;
-  document.getElementById('bc-title').textContent = thread.title;
+  document.title = _thread.title + ' - CrackerVoid';
+  document.getElementById('bc-cat').href = 'forum.html?cat=' + _thread.cat;
+  document.getElementById('bc-cat').textContent = catLabels[_thread.cat] || _thread.cat;
+  document.getElementById('bc-title').textContent = _thread.title;
 
-  function renderHeader() {
-    const t = Forum.getThread(id);
-    const currentUser = Auth.current();
-    const isAdmin = currentUser && Forum._isAdmin(currentUser.username);
-    const adminBtns = isAdmin ? `
-      <button class="btn btn-outline btn-sm" onclick="doPin()" style="font-size:11px">${t.pinned ? '📌 Sabiti Kaldır' : '📌 Sabitle'}</button>
-      <button class="btn btn-outline btn-sm" onclick="doLock()" style="font-size:11px">${t.locked ? '🔓 Kilidi Aç' : '🔒 Kilitle'}</button>` : '';
-    document.getElementById('thread-header').innerHTML = `
-      <h1>${escHtml(t.title)}${t.edited ? ' <span style="font-size:11px;color:var(--text3)">(düzenlendi)</span>' : ''}</h1>
-      <div class="thread-page-meta">
-        <span>Yazan: <strong><a href="profile.html?u=${escHtml(t.author)}" style="color:var(--text2)">${escHtml(t.author)}</a></strong></span>
-        <span>${t.date}</span>
-        <span>${t.replies} yanıt</span>
-        <span>${t.views} görüntülenme</span>
-        ${t.locked ? '<span style="color:#e74c3c;font-weight:700">🔒 KİLİTLİ</span>' : ''}
-        ${adminBtns}
-      </div>`;
-  }
-  renderHeader();
-
-  function renderPosts() {
-    const replies = Forum.getRepliesFor(id);
-    const users = Auth.getUsers();
-    const currentUser = Auth.current();
-
-    function reactionBar(postId) {
-      return `<div class="reaction-bar">${REACTION_LIST.map(e => {
-        const data = Reactions.get(postId);
-        const count = (data[e] || []).length;
-        const active = Reactions.hasReacted(postId, e);
-        return `<button class="react-btn${active?' active':''}" onclick="doReact('${postId}','${e}')">${e}${count>0?' '+count:''}</button>`;
-      }).join('')}</div>`;
-    }
-
-    function postHtml(author, content, date, isOP, postId, quoteOf, postNum) {
-      const authorUser = users.find(u => u.username === author);
-      const rank = getRank(author);
-      const money = Money.get(author);
-      const posts = authorUser ? (authorUser.posts || 0) : 0;
-      const joined = authorUser ? (authorUser.joined || '-') : '-';
-      const likeCount = isOP ? Forum.getLikes(thread.id).length : 0;
-      const liked = isOP ? Forum.hasLiked(thread.id) : false;
-      const canEdit = currentUser && (currentUser.username === author || Forum._isAdmin(currentUser.username));
-
-      // Avatar
-      const avSize = 80;
-      const avHtml = authorUser && authorUser.avatarImg
-        ? `<img src="${authorUser.avatarImg}" class="post-av-img">`
-        : `<div class="post-av-letter" style="background:${rank.color}">${escHtml(author[0].toUpperCase())}</div>`;
-
-      // İçerik
-      let contentHtml;
-      if (isOP && thread.hidden) {
-        const hasLiked = Forum.hasLiked(thread.id);
-        if (hasLiked || (currentUser && currentUser.username === thread.author)) {
-          contentHtml = `<div class="post-text">${escHtml(content)}</div>`;
-        } else {
-          contentHtml = `<div class="hidden-content-wrap">
-            <div class="hidden-content-blur">${escHtml(content)}</div>
-            <div class="hidden-content-overlay">
-              <span>🔒 Bu içerik gizlidir</span><p>Görüntülemek için like at</p>
-              ${currentUser ? `<button class="btn btn-primary btn-sm" onclick="doLike()">👍 Like At ve Gör</button>` : `<a href="login.html?r=${encodeURIComponent(location.href)}" class="btn btn-primary btn-sm">Giriş Yap</a>`}
-            </div></div>`;
-        }
-      } else {
-        contentHtml = `<div class="post-text">${escHtml(content)}</div>`;
-      }
-
-      const quoteHtml = quoteOf ? `<div class="quote-block">↩ <strong>${escHtml(quoteOf.author)}</strong>: ${escHtml(quoteOf.content.substring(0,120))}${quoteOf.content.length>120?'...':''}</div>` : '';
-
-      const editBtn   = canEdit ? `<button class="action-mini-btn" onclick="openEditModal('${isOP?'thread':'reply'}','${postId}',${JSON.stringify(isOP?thread.title:'').replace(/"/g,"'")},${JSON.stringify(content).replace(/"/g,"'")})">✏ Düzenle</button>` : '';
-      const deleteBtn = canEdit ? (isOP ? `<button class="delete-btn" onclick="doDeleteThread()">🗑 Sil</button>` : `<button class="delete-btn" onclick="doDeleteReply(${postId})">🗑 Sil</button>`) : '';
-      const quoteBtn  = currentUser ? `<button class="action-mini-btn" onclick="setQuote(${postId})">↩ Alıntıla</button>` : '';
-      const dmBtn     = currentUser && currentUser.username !== author ? `<a href="messages.html?u=${escHtml(author)}" class="action-mini-btn">✉ DM</a>` : '';
-
-      // Like butonu — tıklayınca popup
-      const likeBtn = isOP ? `
-        <button class="like-btn${liked?' liked':''}" onclick="doLike()">👍 <span id="like-count">${likeCount}</span> Beğen</button>
-        <button class="like-who-btn" onclick="showLikePopup()" title="Kimlerin beğendiğini gör">👁 ${likeCount}</button>` : '';
-
-      const saveBtn = isOP && currentUser ? (() => {
-        const isSaved = Saved.has(currentUser.username, thread.id);
-        return `<button class="save-btn${isSaved?' saved':''}" onclick="doSave()" title="${isSaved?'Kaydedildi':'Kaydet'}">🔖 ${isSaved?'Kaydedildi':'Kaydet'}</button>`;
-      })() : '';
-
-      return `<div class="post-box2">
-        <!-- SOL: KULLANICI KARTI -->
-        <div class="post-user-card">
-          <a href="profile.html?u=${escHtml(author)}" class="post-av-wrap">${avHtml}</a>
-          <a href="profile.html?u=${escHtml(author)}" class="post-uname" style="color:${rank.nameColor || rank.color}">${escHtml(author)}${rank.customTitle ? ` <span style="font-size:10px;background:rgba(255,255,255,.08);border-radius:3px;padding:1px 5px;color:${rank.nameColor || rank.color};border:1px solid ${rank.nameColor || rank.color}44">${escHtml(rank.customTitle)}</span>` : ''}</a>
-          <div class="post-rank-badge" style="background:${rank.color}22;color:${rank.color};border-color:${rank.color}55">${rank.icon} ${rank.name}</div>
-          <div class="post-user-stats">
-            <div class="pus-row"><span>📅 Katılım</span><strong>${joined}</strong></div>
-            <div class="pus-row"><span>💬 Mesaj</span><strong>${posts}</strong></div>
-            <div class="pus-row"><span>💰 Para</span><strong style="color:#2ecc71">${money}</strong></div>
-            <div class="pus-row"><span>👍 Like</span><strong style="color:var(--accent)">${isOP ? likeCount : '-'}</strong></div>
-          </div>
-          ${dmBtn ? `<div style="margin-top:10px">${dmBtn}</div>` : ''}
-        </div>
-        <!-- SAĞ: İÇERİK -->
-        <div class="post-body">
-          <div class="post-body-top">
-            <span class="post-body-date">${date}</span>
-            <span class="post-body-num">#${postNum}</span>
-          </div>
-          ${quoteHtml}
-          ${contentHtml}
-          ${reactionBar(postId)}
-          <div class="post-body-actions">
-            ${likeBtn}
-            ${saveBtn}
-            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-left:auto">
-              ${quoteBtn}${editBtn}${deleteBtn}
-            </div>
-          </div>
-        </div>
-      </div>`;
-    }
-
-    let html = postHtml(thread.author, thread.content, thread.date, true, thread.id, null, 1);
-    replies.forEach((r, i) => {
-      let quoteOf = null;
-      if (r.quoteOf) {
-        const qr = replies.find(x => x.id == r.quoteOf) || (thread.id == r.quoteOf ? { author: thread.author, content: thread.content } : null);
-        if (qr) quoteOf = qr;
-      }
-      html += postHtml(r.author, r.content, r.date, false, r.id, quoteOf, i + 2);
-    });
-    document.getElementById('posts-container').innerHTML = html;
-  }
-
-  renderPosts();
-
-  window.doLike = function() {
-    if (!Auth.current()) { window.location.href = 'login.html?r=' + encodeURIComponent(location.href); return; }
-    Forum.toggleLike(id);
-    renderPosts();
-  };
-
-  window.doSave = function() {
-    if (!Auth.current()) return;
-    const isSaved = Saved.toggle(Auth.current().username, id);
-    renderPosts();
-  };
-
-  window.showLikePopup = function() {
-    const likes = Forum.getLikes(id);
-    const users = Auth.getUsers();
-    const popup = document.getElementById('like-popup');
-    const list = document.getElementById('like-popup-list');
-    if (!likes.length) {
-      list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3)">Henüz like atan yok.</div>';
-    } else {
-      list.innerHTML = likes.map(username => {
-        const u = users.find(x => x.username === username);
-        const rank = getRank(username);
-        const avHtml = u && u.avatarImg
-          ? `<img src="${u.avatarImg}" style="width:32px;height:32px;border-radius:50%;object-fit:cover">`
-          : `<div style="width:32px;height:32px;border-radius:50%;background:${rank.color};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff">${escHtml(username[0].toUpperCase())}</div>`;
-        return `<a href="profile.html?u=${escHtml(username)}" class="like-popup-row">
-          ${avHtml}
-          <div>
-            <div style="font-size:13px;font-weight:700;color:${rank.color}">${escHtml(username)}</div>
-            <div style="font-size:11px;color:var(--text3)">${rank.icon} ${rank.name}</div>
-          </div>
-        </a>`;
-      }).join('');
-    }
-    popup.style.display = 'flex';
-  };
-
-  window.doReact = function(postId, emoji) {
-    if (!Auth.current()) { window.location.href = 'login.html'; return; }
-    Reactions.toggle(postId, emoji);
-    renderPosts();
-  };
-
-  window.doDeleteThread = function() {
-    if (!confirm('Konuyu silmek istediğine emin misin?')) return;
-    if (Forum.deleteThread(id)) window.location.href = 'index.html';
-  };
-
-  window.doDeleteReply = function(replyId) {
-    if (!confirm('Yanıtı silmek istediğine emin misin?')) return;
-    if (Forum.deleteReply(replyId)) renderPosts();
-  };
-
-  window.doPin = function() { Forum.togglePin(id); renderHeader(); };
-  window.doLock = function() { Forum.toggleLock(id); renderHeader(); renderPosts(); renderReplyArea(); };
-
-  window.openEditModal = function(type, postId, title, content) {
-    document.getElementById('edit-type').value = type;
-    document.getElementById('edit-id').value = postId;
-    document.getElementById('edit-title-wrap').style.display = type === 'thread' ? 'block' : 'none';
-    document.getElementById('edit-title-input').value = title || '';
-    document.getElementById('edit-content-input').value = content || '';
-    document.getElementById('edit-modal').style.display = 'flex';
-  };
-  window.closeEditModal = function() { document.getElementById('edit-modal').style.display = 'none'; };
-
-  window.submitEdit = function() {
-    const type = document.getElementById('edit-type').value;
-    const postId = document.getElementById('edit-id').value;
-    const content = document.getElementById('edit-content-input').value.trim();
-    if (!content) return;
-    if (type === 'thread') {
-      const title = document.getElementById('edit-title-input').value.trim();
-      if (!title) return;
-      Forum.editThread(postId, title, content);
-      document.getElementById('bc-title').textContent = title;
-    } else {
-      Forum.editReply(postId, content);
-    }
-    closeEditModal(); renderPosts(); renderHeader();
-  };
-
-  let quoteId = null;
-  window.setQuote = function(replyId) {
-    quoteId = replyId;
-    const r = Forum.getRepliesFor(id).find(x => x.id == replyId);
-    const ta = document.getElementById('reply-content');
-    if (ta && r) { ta.placeholder = '↩ ' + r.author + ' alıntılanıyor...'; ta.focus(); }
-  };
-
-  function renderReplyArea() {
-    const replyArea = document.getElementById('reply-area');
-    const user = Auth.current();
-    const t = Forum.getThread(id);
-    if (t && t.locked && !(user && Forum._isAdmin(user.username))) {
-      replyArea.innerHTML = `<div class="login-prompt" style="margin-top:16px">🔒 Bu konu kilitlenmiştir.</div>`; return;
-    }
-    if (user) {
-      replyArea.innerHTML = `<div class="reply-box">
-        <h3>💬 Yanıt Yaz</h3>
-        <div id="reply-alert" class="alert alert-error"></div>
-        <form id="reply-form">
-          <div class="form-group"><textarea id="reply-content" placeholder="Yanıtını buraya yaz..." required></textarea></div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <button type="submit" class="btn btn-primary">Yanıtla</button>
-            <button type="button" class="btn btn-outline btn-sm" onclick="quoteId=null;document.getElementById('reply-content').placeholder='Yanıtını buraya yaz...'">Alıntıyı Temizle</button>
-          </div>
-        </form>
-      </div>`;
-      document.getElementById('reply-form').addEventListener('submit', e => {
-        e.preventDefault();
-        const content = document.getElementById('reply-content').value.trim();
-        if (!content) return showAlert('reply-alert', 'Yanıt boş olamaz.');
-        const ok = Forum.addReply(id, content, quoteId);
-        if (!ok) return showAlert('reply-alert', 'Konu kilitli.');
-        quoteId = null;
-        document.getElementById('reply-form').reset();
-        document.getElementById('reply-content').placeholder = 'Yanıtını buraya yaz...';
-        document.getElementById('reply-alert').style.display = 'none';
-        renderPosts();
-      });
-    } else {
-      replyArea.innerHTML = `<div class="login-prompt" style="margin-top:16px">Yanıt yazmak için <a href="login.html?r=${encodeURIComponent(location.href)}">giriş yap</a> veya <a href="register.html">kayıt ol</a>.</div>`;
-    }
-  }
+  await renderAll();
   renderReplyArea();
 });
+
+async function renderAll() {
+  const id = _thread.id;
+  _replies = (await Forum.getRepliesFor(id)) || [];
+  const likeRes = await Forum.toggleLike && await apiFetch('/api/threads/' + id + '/likes');
+  _likeData = likeRes || {};
+  renderHeader();
+  await renderPosts();
+}
+
+function renderHeader() {
+  const t = _thread;
+  const isAdmin = _currentUser && (_currentUser.role === 'founder' || _currentUser.role === 'admin' || _currentUser.role === 'moderator');
+  const adminBtns = isAdmin ? `
+    <button class="btn btn-outline btn-sm" onclick="doPin()" style="font-size:11px">${t.pinned ? '📌 Sabiti Kaldır' : '📌 Sabitle'}</button>
+    <button class="btn btn-outline btn-sm" onclick="doLock()" style="font-size:11px">${t.locked ? '🔓 Kilidi Aç' : '🔒 Kilitle'}</button>` : '';
+  document.getElementById('thread-header').innerHTML = `
+    <h1>${escHtml(t.title)}${t.edited ? ' <span style="font-size:11px;color:var(--text3)">(düzenlendi)</span>' : ''}</h1>
+    <div class="thread-page-meta">
+      <span>Yazan: <strong><a href="profile.html?u=${escHtml(t.author)}" style="color:var(--text2)">${escHtml(t.author)}</a></strong></span>
+      <span>${t.date}</span>
+      <span>${t.replies} yanıt</span>
+      <span>${t.views} görüntülenme</span>
+      ${t.locked ? '<span style="color:#e74c3c;font-weight:700">🔒 KİLİTLİ</span>' : ''}
+      ${adminBtns}
+    </div>`;
+}
+
+async function renderPosts() {
+  const t = _thread;
+  const likers = _likeData.likers || [];
+  const liked = _likeData.liked || false;
+
+  async function reactionBar(postId) {
+    const data = await Reactions.get(postId);
+    return `<div class="reaction-bar">${REACTION_LIST.map(e => {
+      const count = (data[e] || []).length;
+      const active = _currentUser && (data[e] || []).includes(_currentUser.username);
+      return `<button class="react-btn${active?' active':''}" onclick="doReact('${postId}','${e}')">${e}${count>0?' '+count:''}</button>`;
+    }).join('')}</div>`;
+  }
+
+  async function postHtml(author, content, date, isOP, postId, quoteOf, postNum, userObj) {
+    const money = userObj ? (await Money.get(author)) : 0;
+    const rank = getRankFromUser(userObj || {username:author, role:'member'}, money);
+    const posts = userObj ? (userObj.posts || 0) : 0;
+    const joined = userObj ? (userObj.joined || '-') : '-';
+    const likeCount = isOP ? likers.length : 0;
+    const canEdit = _currentUser && (_currentUser.username === author || _currentUser.role === 'founder' || _currentUser.role === 'admin' || _currentUser.role === 'moderator');
+
+    const avHtml = userObj && userObj.avatarImg
+      ? `<img src="${userObj.avatarImg}" class="post-av-img">`
+      : `<div class="post-av-letter" style="background:${rank.color}">${escHtml(author[0].toUpperCase())}</div>`;
+
+    let contentHtml;
+    if (isOP && t.hidden) {
+      if (liked || (_currentUser && _currentUser.username === t.author)) {
+        contentHtml = `<div class="post-text">${escHtml(content)}</div>`;
+      } else {
+        contentHtml = `<div class="hidden-content-wrap">
+          <div class="hidden-content-blur">${escHtml(content)}</div>
+          <div class="hidden-content-overlay">
+            <span>🔒 Bu içerik gizlidir</span><p>Görüntülemek için like at</p>
+            ${_currentUser ? `<button class="btn btn-primary btn-sm" onclick="doLike()">👍 Like At ve Gör</button>` : `<a href="login.html?r=${encodeURIComponent(location.href)}" class="btn btn-primary btn-sm">Giriş Yap</a>`}
+          </div></div>`;
+      }
+    } else {
+      contentHtml = `<div class="post-text">${escHtml(content)}</div>`;
+    }
+
+    const quoteHtml = quoteOf ? `<div class="quote-block">↩ <strong>${escHtml(quoteOf.author)}</strong>: ${escHtml(String(quoteOf.content).substring(0,120))}${String(quoteOf.content).length>120?'...':''}</div>` : '';
+    const rxBar = await reactionBar(postId);
+
+    const titleEsc = isOP ? escHtml(t.title).replace(/'/g,"&#39;") : '';
+    const contentEsc = escHtml(content).replace(/'/g,"&#39;");
+    const editBtn   = canEdit ? `<button class="action-mini-btn" onclick="openEditModal('${isOP?'thread':'reply'}','${postId}','${titleEsc}','${contentEsc}')">✏ Düzenle</button>` : '';
+    const deleteBtn = canEdit ? (isOP ? `<button class="delete-btn" onclick="doDeleteThread()">🗑 Sil</button>` : `<button class="delete-btn" onclick="doDeleteReply(${postId})">🗑 Sil</button>`) : '';
+    const quoteBtn  = _currentUser ? `<button class="action-mini-btn" onclick="setQuote(${postId})">↩ Alıntıla</button>` : '';
+    const dmBtn     = _currentUser && _currentUser.username !== author ? `<a href="messages.html?u=${escHtml(author)}" class="action-mini-btn">✉ DM</a>` : '';
+
+    const likeBtn = isOP ? `
+      <button class="like-btn${liked?' liked':''}" onclick="doLike()">👍 <span id="like-count">${likeCount}</span> Beğen</button>
+      <button class="like-who-btn" onclick="showLikePopup()" title="Kimlerin beğendiğini gör">👁 ${likeCount}</button>` : '';
+
+    return `<div class="post-box2">
+      <div class="post-user-card">
+        <a href="profile.html?u=${escHtml(author)}" class="post-av-wrap">${avHtml}</a>
+        <a href="profile.html?u=${escHtml(author)}" class="post-uname" style="color:${rank.nameColor || rank.color}">${escHtml(author)}${rank.customTitle ? ` <span style="font-size:10px;background:rgba(255,255,255,.08);border-radius:3px;padding:1px 5px;color:${rank.nameColor || rank.color};border:1px solid ${rank.nameColor || rank.color}44">${escHtml(rank.customTitle)}</span>` : ''}</a>
+        <div class="post-rank-badge" style="background:${rank.color}22;color:${rank.color};border-color:${rank.color}55">${rank.icon} ${rank.name}</div>
+        <div class="post-user-stats">
+          <div class="pus-row"><span>📅 Katılım</span><strong>${joined}</strong></div>
+          <div class="pus-row"><span>💬 Mesaj</span><strong>${posts}</strong></div>
+          <div class="pus-row"><span>💰 Para</span><strong style="color:#2ecc71">${money}</strong></div>
+          <div class="pus-row"><span>👍 Like</span><strong style="color:var(--accent)">${isOP ? likeCount : '-'}</strong></div>
+        </div>
+        ${dmBtn ? `<div style="margin-top:10px">${dmBtn}</div>` : ''}
+      </div>
+      <div class="post-body">
+        <div class="post-body-top">
+          <span class="post-body-date">${date}</span>
+          <span class="post-body-num">#${postNum}</span>
+        </div>
+        ${quoteHtml}
+        ${contentHtml}
+        ${rxBar}
+        <div class="post-body-actions">
+          ${likeBtn}
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-left:auto">
+            ${quoteBtn}${editBtn}${deleteBtn}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // Fetch user objects
+  async function getUserObj(username) {
+    const res = await apiFetch('/api/users/' + username);
+    return res.ok ? res.user : { username, role:'member', posts:0, joined:'-' };
+  }
+
+  let html = await postHtml(t.author, t.content, t.date, true, t.id, null, 1, await getUserObj(t.author));
+  for (let i = 0; i < _replies.length; i++) {
+    const r = _replies[i];
+    let quoteOf = null;
+    if (r.quote_of) {
+      const qr = _replies.find(x => x.id == r.quote_of) || (t.id == r.quote_of ? { author: t.author, content: t.content } : null);
+      if (qr) quoteOf = qr;
+    }
+    html += await postHtml(r.author, r.content, r.date, false, r.id, quoteOf, i + 2, await getUserObj(r.author));
+  }
+  document.getElementById('posts-container').innerHTML = html;
+}
+
+window.doLike = async function() {
+  if (!_currentUser) { window.location.href = 'login.html?r=' + encodeURIComponent(location.href); return; }
+  const res = await Forum.toggleLike(_thread.id);
+  _likeData = res;
+  await renderPosts();
+};
+
+window.showLikePopup = async function() {
+  const likers = _likeData.likers || [];
+  const popup = document.getElementById('like-popup');
+  const list = document.getElementById('like-popup-list');
+  if (!likers.length) {
+    list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3)">Henüz like atan yok.</div>';
+  } else {
+    const rows = await Promise.all(likers.map(async username => {
+      const res = await apiFetch('/api/users/' + username);
+      const u = res.ok ? res.user : null;
+      const money = await Money.get(username);
+      const rank = getRankFromUser(u || {username, role:'member'}, money);
+      const avHtml = u && u.avatarImg
+        ? `<img src="${u.avatarImg}" style="width:32px;height:32px;border-radius:50%;object-fit:cover">`
+        : `<div style="width:32px;height:32px;border-radius:50%;background:${rank.color};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff">${escHtml(username[0].toUpperCase())}</div>`;
+      return `<a href="profile.html?u=${escHtml(username)}" class="like-popup-row">
+        ${avHtml}
+        <div>
+          <div style="font-size:13px;font-weight:700;color:${rank.color}">${escHtml(username)}</div>
+          <div style="font-size:11px;color:var(--text3)">${rank.icon} ${rank.name}</div>
+        </div>
+      </a>`;
+    }));
+    list.innerHTML = rows.join('');
+  }
+  popup.style.display = 'flex';
+};
+
+window.doReact = async function(postId, emoji) {
+  if (!_currentUser) { window.location.href = 'login.html'; return; }
+  await Reactions.toggle(postId, emoji);
+  await renderPosts();
+};
+
+window.doDeleteThread = async function() {
+  if (!confirm('Konuyu silmek istediğine emin misin?')) return;
+  const ok = await Forum.deleteThread(_thread.id);
+  if (ok) window.location.href = 'index.html';
+};
+
+window.doDeleteReply = async function(replyId) {
+  if (!confirm('Yanıtı silmek istediğine emin misin?')) return;
+  await Forum.deleteReply(replyId);
+  _thread = await Forum.getThread(_thread.id);
+  await renderAll();
+};
+
+window.doPin = async function() {
+  await Forum.togglePin(_thread.id);
+  _thread = await Forum.getThread(_thread.id);
+  renderHeader();
+};
+
+window.doLock = async function() {
+  await Forum.toggleLock(_thread.id);
+  _thread = await Forum.getThread(_thread.id);
+  renderHeader();
+  await renderPosts();
+  renderReplyArea();
+};
+
+window.openEditModal = function(type, postId, title, content) {
+  document.getElementById('edit-type').value = type;
+  document.getElementById('edit-id').value = postId;
+  document.getElementById('edit-title-wrap').style.display = type === 'thread' ? 'block' : 'none';
+  document.getElementById('edit-title-input').value = title || '';
+  document.getElementById('edit-content-input').value = content || '';
+  document.getElementById('edit-modal').style.display = 'flex';
+};
+window.closeEditModal = function() { document.getElementById('edit-modal').style.display = 'none'; };
+
+window.submitEdit = async function() {
+  const type = document.getElementById('edit-type').value;
+  const postId = document.getElementById('edit-id').value;
+  const content = document.getElementById('edit-content-input').value.trim();
+  if (!content) return;
+  if (type === 'thread') {
+    const title = document.getElementById('edit-title-input').value.trim();
+    if (!title) return;
+    await Forum.editThread(postId, title, content);
+    _thread = await Forum.getThread(_thread.id);
+    document.getElementById('bc-title').textContent = title;
+  } else {
+    await Forum.editReply(postId, content);
+  }
+  closeEditModal();
+  await renderAll();
+  renderHeader();
+};
+
+window.setQuote = function(replyId) {
+  _quoteId = replyId;
+  const r = _replies.find(x => x.id == replyId);
+  const ta = document.getElementById('reply-content');
+  if (ta && r) { ta.placeholder = '↩ ' + r.author + ' alıntılanıyor...'; ta.focus(); }
+};
+
+function renderReplyArea() {
+  const replyArea = document.getElementById('reply-area');
+  const t = _thread;
+  const isAdmin = _currentUser && (_currentUser.role === 'founder' || _currentUser.role === 'admin' || _currentUser.role === 'moderator');
+  if (t && t.locked && !isAdmin) {
+    replyArea.innerHTML = `<div class="login-prompt" style="margin-top:16px">🔒 Bu konu kilitlenmiştir.</div>`; return;
+  }
+  if (_currentUser) {
+    replyArea.innerHTML = `<div class="reply-box">
+      <h3>💬 Yanıt Yaz</h3>
+      <div id="reply-alert" class="alert alert-error"></div>
+      <form id="reply-form">
+        <div class="form-group"><textarea id="reply-content" placeholder="Yanıtını buraya yaz..." required></textarea></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button type="submit" class="btn btn-primary">Yanıtla</button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="_quoteId=null;document.getElementById('reply-content').placeholder='Yanıtını buraya yaz...'">Alıntıyı Temizle</button>
+        </div>
+      </form>
+    </div>`;
+    document.getElementById('reply-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const content = document.getElementById('reply-content').value.trim();
+      if (!content) return showAlert('reply-alert', 'Yanıt boş olamaz.');
+      const ok = await Forum.addReply(_thread.id, content, _quoteId);
+      if (!ok) return showAlert('reply-alert', 'Konu kilitli veya hata oluştu.');
+      _quoteId = null;
+      document.getElementById('reply-form').reset();
+      document.getElementById('reply-content').placeholder = 'Yanıtını buraya yaz...';
+      document.getElementById('reply-alert').style.display = 'none';
+      _thread = await Forum.getThread(_thread.id);
+      await renderAll();
+    });
+  } else {
+    replyArea.innerHTML = `<div class="login-prompt" style="margin-top:16px">Yanıt yazmak için <a href="login.html?r=${encodeURIComponent(location.href)}">giriş yap</a> veya <a href="register.html">kayıt ol</a>.</div>`;
+  }
+}
 </script>
 </body>
 </html>

@@ -231,13 +231,43 @@ def update_profile(username):
     if session.get('username') != username: return jsonify({'ok':False}), 403
     d = request.json
     con = get_db(); c = con.cursor()
-    fields = ['bio','location','discord','website','avatar_color','avatar_img']
-    for f in fields:
+    allowed = ['bio','location','discord','website','avatar_color','avatar_img']
+    for f in allowed:
         if f in d:
-            col = f.replace('avatar_color','avatar_color').replace('avatar_img','avatar_img')
-            c.execute(f"UPDATE users SET {col}=? WHERE username=?", (d[f], username))
+            c.execute(f"UPDATE users SET {f}=? WHERE username=?", (d[f], username))
     con.commit(); con.close()
     return jsonify({'ok':True,'user':_user_obj(username)})
+
+@app.route('/api/users/<username>/change-password', methods=['POST'])
+def change_password(username):
+    if session.get('username') != username: return jsonify({'ok':False}), 403
+    d = request.json
+    old_pw = d.get('old_password','')
+    new_pw = d.get('new_password','')
+    if len(new_pw) < 6: return jsonify({'ok':False,'msg':'Şifre en az 6 karakter.'})
+    con = get_db(); c = con.cursor()
+    row = c.execute("SELECT password FROM users WHERE username=?", (username,)).fetchone()
+    if not row or row['password'] != hash_pw(old_pw):
+        con.close(); return jsonify({'ok':False,'msg':'Mevcut şifre hatalı.'})
+    c.execute("UPDATE users SET password=? WHERE username=?", (hash_pw(new_pw), username))
+    con.commit(); con.close()
+    return jsonify({'ok':True})
+
+@app.route('/api/users/<username>/delete', methods=['POST'])
+def delete_account(username):
+    if session.get('username') != username: return jsonify({'ok':False}), 403
+    if username == 'zadrex': return jsonify({'ok':False,'msg':'Bu hesap silinemez.'})
+    d = request.json
+    con = get_db(); c = con.cursor()
+    row = c.execute("SELECT password FROM users WHERE username=?", (username,)).fetchone()
+    if not row or row['password'] != hash_pw(d.get('password','')):
+        con.close(); return jsonify({'ok':False,'msg':'Şifre hatalı.'})
+    c.execute("DELETE FROM users WHERE username=?", (username,))
+    c.execute("DELETE FROM threads WHERE author=?", (username,))
+    c.execute("DELETE FROM replies WHERE author=?", (username,))
+    con.commit(); con.close()
+    session.clear()
+    return jsonify({'ok':True})
 
 # ── MONEY ─────────────────────────────────────────────
 def _get_money(username):
@@ -601,6 +631,32 @@ def admin_ban(target):
     con = get_db(); c = con.cursor()
     c.execute("UPDATE users SET banned=1-banned WHERE username=?", (target,))
     con.commit(); con.close(); return jsonify({'ok':True})
+
+@app.route('/api/admin/delete-user/<target>', methods=['POST'])
+def admin_delete_user(target):
+    u = session.get('username')
+    if not u or not is_admin(u): return jsonify({'ok':False}), 403
+    if target == 'zadrex': return jsonify({'ok':False,'msg':'Bu kullanıcı silinemez.'})
+    con = get_db(); c = con.cursor()
+    c.execute("DELETE FROM users WHERE username=?", (target,))
+    c.execute("DELETE FROM threads WHERE author=?", (target,))
+    c.execute("DELETE FROM replies WHERE author=?", (target,))
+    con.commit(); con.close(); return jsonify({'ok':True})
+
+@app.route('/api/admin/money/<target>', methods=['POST'])
+def admin_money(target):
+    u = session.get('username')
+    if not u or not is_admin(u): return jsonify({'ok':False}), 403
+    d = request.json
+    amount = int(d.get('amount', 0))
+    action = d.get('action', 'add')
+    con = get_db(); c = con.cursor()
+    if not c.execute("SELECT 1 FROM users WHERE username=?", (target,)).fetchone():
+        con.close(); return jsonify({'ok':False,'msg':'Kullanıcı bulunamadı.'})
+    con.close()
+    if action == 'add': _add_money(target, amount)
+    else: _sub_money(target, amount)
+    return jsonify({'ok':True})
 
 @app.route('/api/admin/role/<target>', methods=['POST'])
 def admin_role(target):

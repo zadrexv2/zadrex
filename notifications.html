@@ -10,7 +10,6 @@
 <div class="legal-bar">
   ⚠ CrackerVoid yalnızca eğitim amaçlıdır. Paylaşılan içeriklerden yalnızca paylaşan kişi sorumludur. Site hiçbir hukuki sorumluluk kabul etmez. Kayıt olarak bu şartları kabul etmiş sayılırsın.
 </div>
-
 <nav class="navbar">
   <a href="index.html" class="navbar-brand">Cracker<span>Void</span></a>
   <button class="hamburger" id="hamburger-btn">☰</button>
@@ -27,19 +26,24 @@
   <div id="notif-list"></div>
 </div>
 <footer>© 2026 <span>CrackerVoid</span></footer>
-<script src="app.js"></script>
+<script src="api.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  if (!Auth.require()) return;
-  const user = Auth.current();
-  Notif.markRead(user.username);
-  updateNavbar();
-  render();
+document.addEventListener('DOMContentLoaded', async () => {
+  const user = await Auth.init();
+  if (!user) { window.location.href = 'login.html?r=' + encodeURIComponent(location.href); return; }
 
-  function render() {
-    const notifs = Notif.get(user.username);
+  const navRight = document.getElementById('nav-right');
+  navRight.innerHTML = `<a href="messages.html" class="btn btn-outline btn-sm">✉</a>
+    <a href="profile.html" class="btn btn-outline btn-sm">${escHtml(user.username)}</a>
+    <button class="btn btn-outline btn-sm" onclick="Auth.logout()">Çıkış</button>`;
+
+  await Notif.markRead();
+  await render();
+
+  async function render() {
+    const notifs = await Notif.get();
     const el = document.getElementById('notif-list');
-    if (!notifs.length) {
+    if (!Array.isArray(notifs) || !notifs.length) {
       el.innerHTML = '<div class="empty-msg">Henüz bildirim yok.</div>';
       return;
     }
@@ -55,10 +59,9 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>`).join('');
   }
 
-  window.markAll = function() {
-    Notif.markRead(user.username);
-    render();
-    updateNavbar();
+  window.markAll = async function() {
+    await Notif.markRead();
+    await render();
   };
 });
 </script>

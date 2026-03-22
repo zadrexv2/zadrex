@@ -36,17 +36,11 @@
         <span>›</span>
         <span id="cat-label">Forum</span>
       </div>
-
-      <!-- Yeni konu: login varsa form, yoksa prompt -->
       <div id="new-thread-area"></div>
-
-      <!-- Thread listesi -->
       <div class="thread-list" id="thread-list">
         <div class="empty-msg">Yükleniyor...</div>
       </div>
     </div>
-
-    <!-- SIDEBAR -->
     <div>
       <div class="sidebar-box">
         <h4>Kategoriler</h4>
@@ -61,7 +55,7 @@
           <li><a href="forum.html?cat=pazar">Pazar</a></li>
         </ul>
       </div>
-      <div class="sidebar-box" id="sb-stats">
+      <div class="sidebar-box">
         <h4>İstatistikler</h4>
         <ul>
           <li>Konular: <span id="sb-threads">-</span></li>
@@ -74,37 +68,47 @@
 </div>
 
 <footer>&copy; 2026 <span>CrackerVoid</span></footer>
-<script src="app.js"></script>
+<script src="api.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  const user = await Auth.init();
   const params = new URLSearchParams(location.search);
   const cat = params.get('cat') || 'genel';
   const labels = { genel:'Genel Tartışma', 'soru-cevap':'Soru & Cevap', duyurular:'Duyurular', cracking:'Cracking / Pentest', tools:'Araçlar & Yazılımlar', leaks:'Leaks / Releases', hesaplar:'Hesap Paylaşımları', pazar:'Pazar' };
-  const label = labels[cat] || cat;
-  document.getElementById('cat-label').textContent = label;
-  document.title = label + ' - CrackerVoid';
+  document.getElementById('cat-label').textContent = labels[cat] || cat;
+  document.title = (labels[cat] || cat) + ' - CrackerVoid';
 
-  // Aktif nav
   document.querySelectorAll('.navbar-nav a').forEach(a => {
     if (a.href.includes('cat=' + cat)) a.classList.add('active');
   });
 
-  // Sidebar stats
-  const s = Forum.stats();
-  document.getElementById('sb-threads').textContent = s.threads;
-  document.getElementById('sb-posts').textContent = s.posts;
-  document.getElementById('sb-members').textContent = s.members;
+  // Navbar
+  const navRight = document.getElementById('nav-right');
+  if (user) {
+    navRight.innerHTML = `<a href="notifications.html" class="btn btn-outline btn-sm">🔔</a>
+      <a href="messages.html" class="btn btn-outline btn-sm">✉</a>
+      <a href="profile.html" class="btn btn-outline btn-sm">${escHtml(user.username)}</a>
+      <button class="btn btn-outline btn-sm" onclick="Auth.logout()">Çıkış</button>`;
+  } else {
+    navRight.innerHTML = `<a href="login.html" class="btn btn-outline btn-sm">Giriş</a>
+      <a href="register.html" class="btn btn-primary btn-sm">Kayıt Ol</a>`;
+  }
+
+  // Stats
+  const stats = await Forum.stats();
+  document.getElementById('sb-threads').textContent = stats.threads || 0;
+  document.getElementById('sb-posts').textContent = stats.posts || 0;
+  document.getElementById('sb-members').textContent = stats.members || 0;
 
   // Thread listesi
-  renderThreads('thread-list', Forum.getByCategory(cat));
+  await loadThreads();
 
   // Yeni konu alanı
   const area = document.getElementById('new-thread-area');
-  const user = Auth.current();
   if (user) {
     area.innerHTML = `
       <div class="new-thread-box">
-        <h3>&#x270F; Yeni Konu Aç</h3>
+        <h3>✏ Yeni Konu Aç</h3>
         <div id="thread-alert" class="alert alert-error"></div>
         <div id="thread-success" class="alert alert-success"></div>
         <form id="new-thread-form">
@@ -124,24 +128,45 @@ document.addEventListener('DOMContentLoaded', () => {
         </form>
       </div>`;
 
-    document.getElementById('new-thread-form').addEventListener('submit', e => {
+    document.getElementById('new-thread-form').addEventListener('submit', async e => {
       e.preventDefault();
       const title = document.getElementById('thread-title').value.trim();
       const content = document.getElementById('thread-content').value.trim();
       const hidden = document.getElementById('thread-hidden').checked;
       if (!title || !content) return showAlert('thread-alert', 'Başlık ve içerik boş olamaz.');
-      const id = Forum.addThread(cat, title, content, hidden);
+      const id = await Forum.addThread(cat, title, content, hidden);
+      if (!id) return showAlert('thread-alert', 'Konu oluşturulamadı.');
       document.getElementById('new-thread-form').reset();
-      renderThreads('thread-list', Forum.getByCategory(cat));
       showAlert('thread-success', 'Konu başarıyla oluşturuldu!', 'success');
       document.getElementById('thread-alert').style.display = 'none';
-      // Konuya git
       setTimeout(() => { window.location.href = 'thread.html?id=' + id; }, 800);
     });
   } else {
     area.innerHTML = `<div class="login-prompt">Konu açmak için <a href="login.html?r=${encodeURIComponent(location.href)}">giriş yap</a> veya <a href="register.html">kayıt ol</a>.</div>`;
   }
 });
+
+async function loadThreads() {
+  const params = new URLSearchParams(location.search);
+  const cat = params.get('cat') || 'genel';
+  const threads = await Forum.getThreads(cat);
+  const el = document.getElementById('thread-list');
+  if (!threads.length) { el.innerHTML = '<div class="empty-msg">Bu kategoride henüz konu yok.</div>'; return; }
+  el.innerHTML = threads.map(t => `
+    <div class="thread-row${t.pinned ? ' pinned' : ''}">
+      <div class="thread-title-col">
+        ${t.pinned ? '<span style="color:var(--accent);font-size:11px">📌 </span>' : ''}
+        ${t.locked ? '<span style="color:#e74c3c;font-size:11px">🔒 </span>' : ''}
+        <a href="thread.html?id=${t.id}">${escHtml(t.title)}</a>
+        <div class="thread-meta">
+          <a href="profile.html?u=${escHtml(t.author)}" style="color:var(--accent)">${escHtml(t.author)}</a> · ${t.date}
+        </div>
+      </div>
+      <div class="thread-stat tc">${t.replies}</div>
+      <div class="thread-stat tc">${t.views}</div>
+      <div class="thread-last">${t.date}</div>
+    </div>`).join('');
+}
 </script>
 </body>
 </html>

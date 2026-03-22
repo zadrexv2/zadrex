@@ -38,27 +38,49 @@
       </select>
     </div>
   </div>
-
-  <div id="users-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px"></div>
+  <div id="users-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px">
+    <div class="empty-msg" style="grid-column:1/-1">Yükleniyor...</div>
+  </div>
 </div>
 
 <footer>© 2026 <span>CrackerVoid</span></footer>
-<script src="app.js"></script>
+<script src="api.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+let _allUsers = [];
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const user = await Auth.init();
+  const navRight = document.getElementById('nav-right');
+  if (user) {
+    navRight.innerHTML = `<a href="notifications.html" class="btn btn-outline btn-sm">🔔</a>
+      <a href="messages.html" class="btn btn-outline btn-sm">✉</a>
+      <a href="profile.html" class="btn btn-outline btn-sm">${escHtml(user.username)}</a>
+      <button class="btn btn-outline btn-sm" onclick="Auth.logout()">Çıkış</button>`;
+  } else {
+    navRight.innerHTML = `<a href="login.html" class="btn btn-outline btn-sm">Giriş</a>
+      <a href="register.html" class="btn btn-primary btn-sm">Kayıt Ol</a>`;
+  }
+
+  // Fetch all users with money info
+  const users = await apiFetch('/api/users');
+  const moneyData = {};
+  await Promise.all(users.map(async u => {
+    moneyData[u.username] = await Money.get(u.username);
+  }));
+  _allUsers = users.map(u => ({ ...u, _money: moneyData[u.username] || 0 }));
   renderUsers();
 });
 
-function renderUsers() {
-  var query = document.getElementById('user-search').value.trim().toLowerCase();
-  var sort = document.getElementById('user-sort').value;
-  var users = Auth.getUsers();
+window.renderUsers = function() {
+  const query = document.getElementById('user-search').value.trim().toLowerCase();
+  const sort = document.getElementById('user-sort').value;
+  let users = _allUsers.slice();
 
-  if (query) users = users.filter(function(u){ return u.username.toLowerCase().includes(query); });
+  if (query) users = users.filter(u => u.username.toLowerCase().includes(query));
 
-  if (sort === 'posts') users = users.sort(function(a,b){ return (b.posts||0)-(a.posts||0); });
-  else if (sort === 'money') users = users.sort(function(a,b){ return Money.get(b.username)-Money.get(a.username); });
-  else users = users.sort(function(a,b){ return b.id - a.id; });
+  if (sort === 'posts') users.sort((a,b) => (b.posts||0) - (a.posts||0));
+  else if (sort === 'money') users.sort((a,b) => b._money - a._money);
+  else users.sort((a,b) => b.id - a.id);
 
   document.getElementById('total-count').textContent = users.length;
 
@@ -67,40 +89,30 @@ function renderUsers() {
     return;
   }
 
-  document.getElementById('users-grid').innerHTML = users.map(function(u) {
-    var rank = getRank(u.username);
-    var money = Money.get(u.username);
-    var threads = Forum.getThreads().filter(function(t){ return t.author === u.username; }).length;
-    var badges = Badges.get(u.username).concat(u.badges || []);
-    var badgeHtml = badges.slice(0,5).map(function(b){
-      var def = Badges.DEFS.find(function(x){ return x.id === b; });
-      return def ? '<span title="'+escHtml(def.name)+'">'+def.icon+'</span>' : '<span>'+escHtml(b)+'</span>';
-    }).join('');
+  document.getElementById('users-grid').innerHTML = users.map(u => {
+    const rank = getRankFromUser(u, u._money);
+    const avHtml = u.avatarImg
+      ? `<img src="${u.avatarImg}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;position:absolute;inset:0">`
+      : `<span style="font-size:22px;font-weight:800;color:#fff">${escHtml(u.username[0].toUpperCase())}</span>`;
 
-    var avHtml = u.avatarImg
-      ? '<img src="'+u.avatarImg+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;position:absolute;inset:0">'
-      : '<span style="font-size:22px;font-weight:800;color:#fff">'+escHtml(u.username[0].toUpperCase())+'</span>';
-
-    return '<a href="profile.html?u='+escHtml(u.username)+'" class="user-card-link" style="text-decoration:none">' +
-      '<div class="user-card" style="background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:10px;transition:border-color .2s;cursor:pointer" onmouseover="this.style.borderColor=\''+rank.color+'\'" onmouseout="this.style.borderColor=\'var(--border2)\'">' +
-        '<div style="display:flex;align-items:center;gap:12px">' +
-          '<div style="width:52px;height:52px;border-radius:50%;background:'+(u.avatarImg?'transparent':rank.color)+';flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;border:2px solid '+rank.color+'44">'+avHtml+'</div>' +
-          '<div style="flex:1;min-width:0">' +
-            '<div style="font-size:14px;font-weight:700;color:'+(rank.nameColor||rank.color)+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+escHtml(u.username)+(rank.customTitle?'<span style="font-size:10px;margin-left:5px;background:rgba(255,255,255,.08);border-radius:3px;padding:1px 5px;border:1px solid '+(rank.nameColor||rank.color)+'44">'+escHtml(rank.customTitle)+'</span>':'')+'</div>' +
-            '<div style="font-size:11px;color:'+rank.color+';margin-top:2px">'+rank.icon+' '+rank.name+'</div>' +
-          '</div>' +
-        '</div>' +
-        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:11px;color:var(--text3);text-align:center">' +
-          '<div style="background:var(--bg3);border-radius:5px;padding:5px 0"><div style="font-size:13px;font-weight:700;color:var(--text)">'+(u.posts||0)+'</div>Mesaj</div>' +
-          '<div style="background:var(--bg3);border-radius:5px;padding:5px 0"><div style="font-size:13px;font-weight:700;color:var(--text)">'+threads+'</div>Konu</div>' +
-          '<div style="background:var(--bg3);border-radius:5px;padding:5px 0"><div style="font-size:13px;font-weight:700;color:#2ecc71">'+money+'</div>💰</div>' +
-        '</div>' +
-        (badgeHtml ? '<div style="font-size:16px;display:flex;gap:4px;flex-wrap:wrap">'+badgeHtml+'</div>' : '') +
-        '<div style="font-size:11px;color:var(--text3)">📅 '+escHtml(u.joined||'-')+'</div>' +
-      '</div>' +
-    '</a>';
+    return `<a href="profile.html?u=${escHtml(u.username)}" style="text-decoration:none">
+      <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:10px;transition:border-color .2s;cursor:pointer" onmouseover="this.style.borderColor='${rank.color}'" onmouseout="this.style.borderColor='var(--border2)'">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:52px;height:52px;border-radius:50%;background:${u.avatarImg?'transparent':rank.color};flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;border:2px solid ${rank.color}44">${avHtml}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:700;color:${rank.nameColor||rank.color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(u.username)}${rank.customTitle?`<span style="font-size:10px;margin-left:5px;background:rgba(255,255,255,.08);border-radius:3px;padding:1px 5px;border:1px solid ${rank.nameColor||rank.color}44">${escHtml(rank.customTitle)}</span>`:''}</div>
+            <div style="font-size:11px;color:${rank.color};margin-top:2px">${rank.icon} ${rank.name}</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:11px;color:var(--text3);text-align:center">
+          <div style="background:var(--bg3);border-radius:5px;padding:5px 0"><div style="font-size:13px;font-weight:700;color:var(--text)">${u.posts||0}</div>Mesaj</div>
+          <div style="background:var(--bg3);border-radius:5px;padding:5px 0"><div style="font-size:13px;font-weight:700;color:#2ecc71">${u._money}</div>💰</div>
+          <div style="background:var(--bg3);border-radius:5px;padding:5px 0"><div style="font-size:13px;font-weight:700;color:var(--text)">${escHtml(u.joined||'-')}</div>Katılım</div>
+        </div>
+      </div>
+    </a>`;
   }).join('');
-}
+};
 </script>
 </body>
 </html>

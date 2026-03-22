@@ -27,13 +27,9 @@
     .user-table tr:hover td{background:var(--bg4)}
     .action-btn{padding:3px 9px;border-radius:3px;border:none;cursor:pointer;font-size:11px;font-weight:600;margin-right:4px}
     .btn-ban{background:rgba(192,57,43,.2);color:#e74c3c;border:1px solid rgba(192,57,43,.4)}
-    .btn-ban:hover{background:rgba(192,57,43,.4)}
     .btn-unban{background:rgba(39,174,96,.2);color:#2ecc71;border:1px solid rgba(39,174,96,.4)}
-    .btn-unban:hover{background:rgba(39,174,96,.4)}
     .btn-del{background:rgba(192,57,43,.15);color:#e74c3c;border:1px solid rgba(192,57,43,.3)}
-    .btn-del:hover{background:rgba(192,57,43,.35)}
     .btn-money{background:rgba(241,196,15,.15);color:#f1c40f;border:1px solid rgba(241,196,15,.3)}
-    .btn-money:hover{background:rgba(241,196,15,.3)}
     .badge-banned{background:rgba(192,57,43,.2);color:#e74c3c;padding:2px 7px;border-radius:3px;font-size:10px;font-weight:700}
     .search-bar{background:var(--bg2);border:1px solid var(--border2);border-radius:4px;padding:7px 12px;color:var(--text);font-size:13px;width:100%;margin-bottom:12px;outline:none}
     .search-bar:focus{border-color:var(--accent)}
@@ -41,25 +37,16 @@
   </style>
 </head>
 <body>
-<div class="legal-bar">
-  ⚠ CrackerVoid yalnızca eğitim amaçlıdır. Paylaşılan içeriklerden yalnızca paylaşan kişi sorumludur. Site hiçbir hukuki sorumluluk kabul etmez. Kayıt olarak bu şartları kabul etmiş sayılırsın.
-</div>
+<div class="legal-bar">⚠ CrackerVoid yalnızca eğitim amaçlıdır.</div>
 
-
-<!-- LOGIN EKRANI -->
+<!-- LOGIN -->
 <div id="admin-login-screen" class="admin-login">
   <div class="auth-box" style="max-width:360px">
     <h2>🛡 Admin Girişi</h2>
     <p class="sub">CrackerVoid Yönetim Paneli</p>
     <div id="admin-login-alert" class="alert alert-error"></div>
-    <div class="form-group">
-      <label>Kullanıcı Adı</label>
-      <input type="text" id="admin-user" placeholder="Admin adı">
-    </div>
-    <div class="form-group">
-      <label>Şifre</label>
-      <input type="password" id="admin-pass" placeholder="••••••••">
-    </div>
+    <div class="form-group"><label>Kullanıcı Adı</label><input type="text" id="admin-user" placeholder="Admin adı"></div>
+    <div class="form-group"><label>Şifre</label><input type="password" id="admin-pass" placeholder="••••••••"></div>
     <button class="btn btn-primary" style="width:100%" onclick="adminLogin()">Giriş Yap</button>
   </div>
 </div>
@@ -69,94 +56,60 @@
   <nav class="navbar">
     <a href="index.html" class="navbar-brand">Cracker<span>Void</span> <span style="font-size:11px;color:var(--text3);font-weight:400">Admin</span></a>
     <div style="display:flex;align-items:center;gap:8px">
-      <span style="font-size:12px;color:var(--text3)">🛡 zadrex</span>
+      <span id="admin-name-label" style="font-size:12px;color:var(--text3)">🛡</span>
       <button class="btn btn-outline btn-sm" onclick="adminLogout()">Çıkış</button>
     </div>
   </nav>
-
   <div class="admin-wrap">
-    <!-- SOL MENÜ -->
     <div class="admin-sidebar">
       <h3>Yönetim</h3>
       <a href="#" class="active" data-panel="dashboard">📊 Dashboard</a>
       <a href="#" data-panel="users">👥 Üyeler</a>
       <a href="#" data-panel="threads">📋 Konular</a>
       <a href="#" data-panel="roles">🎖 Rol Ver</a>
-      <a href="#" data-panel="money">💰 Para Yönetimi</a>
+      <a href="#" data-panel="money">💰 Para</a>
       <a href="#" data-panel="post">✏️ Konu Paylaş</a>
       <a href="#" data-panel="announce">📢 Duyuru</a>
       <a href="#" data-panel="shout">💬 Sohbet</a>
     </div>
-
-    <!-- İÇERİK -->
     <div class="admin-content">
-
-      <!-- DASHBOARD -->
       <div class="admin-panel active" id="panel-dashboard">
         <div class="stat-grid" id="dash-stats"></div>
-        <div class="admin-card">
-          <h3>📋 Son Konular</h3>
-          <div id="dash-threads"></div>
-        </div>
+        <div class="admin-card"><h3>📋 Son Konular</h3><div id="dash-threads"></div></div>
       </div>
-
-      <!-- ÜYELER -->
       <div class="admin-panel" id="panel-users">
-        <div class="admin-card">
-          <h3>👥 Üye Yönetimi</h3>
+        <div class="admin-card"><h3>👥 Üye Yönetimi</h3>
           <input class="search-bar" id="user-search" placeholder="Kullanıcı ara..." oninput="renderUsers()">
           <div style="overflow-x:auto"><table class="user-table" id="user-table-body"></table></div>
         </div>
       </div>
-
-      <!-- KONULAR -->
       <div class="admin-panel" id="panel-threads">
-        <div class="admin-card">
-          <h3>📋 Konu Yönetimi</h3>
+        <div class="admin-card"><h3>📋 Konu Yönetimi</h3>
           <input class="search-bar" id="thread-search" placeholder="Konu ara..." oninput="renderAdminThreads()">
           <div style="overflow-x:auto"><table class="user-table" id="thread-table-body"></table></div>
         </div>
       </div>
-
-      <!-- PARA YÖNETİMİ -->
       <div class="admin-panel" id="panel-money">
-        <div class="admin-card">
-          <h3>💰 Para Ver / Al</h3>
+        <div class="admin-card"><h3>💰 Para Ver / Al</h3>
           <div style="display:grid;grid-template-columns:1fr 1fr 120px 120px;gap:10px;align-items:end">
-            <div class="form-group" style="margin:0">
-              <label>Kullanıcı</label>
-              <input type="text" id="money-user" placeholder="Kullanıcı adı">
-            </div>
-            <div class="form-group" style="margin:0">
-              <label>Miktar</label>
-              <input type="number" id="money-amount" placeholder="1000" min="1">
-            </div>
-            <button class="btn btn-green" onclick="adminAddMoney()">+ Ver</button>
+            <div class="form-group" style="margin:0"><label>Kullanıcı</label><input type="text" id="money-user" placeholder="Kullanıcı adı"></div>
+            <div class="form-group" style="margin:0"><label>Miktar</label><input type="number" id="money-amount" placeholder="1000" min="1"></div>
+            <button class="btn btn-primary" onclick="adminAddMoney()">+ Ver</button>
             <button class="btn btn-outline" style="border-color:var(--accent);color:var(--accent)" onclick="adminSubMoney()">− Al</button>
           </div>
           <div id="money-msg" class="alert alert-success" style="margin-top:12px"></div>
         </div>
-        <div class="admin-card">
-          <h3>💰 Tüm Bakiyeler</h3>
-          <div id="money-list"></div>
-        </div>
+        <div class="admin-card"><h3>💰 Tüm Bakiyeler</h3><div id="money-list"></div></div>
       </div>
-
-      <!-- ROL VER -->
       <div class="admin-panel" id="panel-roles">
-        <div class="admin-card">
-          <h3>🎖 Kullanıcıya Rol Ver</h3>
+        <div class="admin-card"><h3>🎖 Rol Ver</h3>
           <div id="role-msg" class="alert alert-success"></div>
           <div id="role-err" class="alert alert-error"></div>
           <div style="display:grid;grid-template-columns:1fr 1fr 140px;gap:10px;align-items:end;margin-bottom:16px">
-            <div class="form-group" style="margin:0">
-              <label>Kullanıcı Adı</label>
-              <input type="text" id="role-user" placeholder="Kullanıcı adı">
-            </div>
-            <div class="form-group" style="margin:0">
-              <label>Rol</label>
+            <div class="form-group" style="margin:0"><label>Kullanıcı Adı</label><input type="text" id="role-user" placeholder="Kullanıcı adı"></div>
+            <div class="form-group" style="margin:0"><label>Rol</label>
               <select id="role-select">
-                <option value="member">👤 Üye (Normal)</option>
+                <option value="member">👤 Üye</option>
                 <option value="vip">⭐ VIP</option>
                 <option value="moderator">🔧 Moderatör</option>
                 <option value="admin">🛡 Admin</option>
@@ -167,122 +120,87 @@
           <div id="role-list"></div>
         </div>
       </div>
-
-      <!-- KONU PAYLAŞ -->
       <div class="admin-panel" id="panel-post">
-        <div class="admin-card">
-          <h3>✏️ Admin Olarak Konu Paylaş</h3>
+        <div class="admin-card"><h3>✏️ Konu Paylaş</h3>
           <div id="post-alert" class="alert alert-error"></div>
           <div id="post-success" class="alert alert-success"></div>
-          <div class="form-group">
-            <label>Kategori</label>
+          <div class="form-group"><label>Kategori</label>
             <select id="post-cat">
-              <option value="genel">Genel Tartışma</option>
-              <option value="soru-cevap">Soru & Cevap</option>
-              <option value="duyurular">Duyurular</option>
-              <option value="cracking">Cracking / Pentest</option>
-              <option value="tools">Araçlar & Yazılımlar</option>
-              <option value="leaks">Leaks / Releases</option>
-              <option value="pazar">Pazar</option>
+              <option value="genel">Genel</option><option value="soru-cevap">Soru & Cevap</option>
+              <option value="duyurular">Duyurular</option><option value="cracking">Cracking</option>
+              <option value="tools">Araçlar</option><option value="leaks">Leaks</option><option value="pazar">Pazar</option>
             </select>
           </div>
-          <div class="form-group">
-            <label>Başlık</label>
-            <input type="text" id="post-title" placeholder="Konu başlığı...">
-          </div>
-          <div class="form-group">
-            <label>İçerik</label>
-            <textarea id="post-content" placeholder="Konu içeriği..." style="min-height:150px"></textarea>
-          </div>
+          <div class="form-group"><label>Başlık</label><input type="text" id="post-title" placeholder="Konu başlığı..."></div>
+          <div class="form-group"><label>İçerik</label><textarea id="post-content" placeholder="Konu içeriği..." style="min-height:150px"></textarea></div>
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
             <input type="checkbox" id="post-pin" style="accent-color:var(--accent)">
             <label for="post-pin" style="font-size:13px;cursor:pointer">📌 Sabitle</label>
             <input type="checkbox" id="post-hidden" style="accent-color:var(--accent);margin-left:16px">
             <label for="post-hidden" style="font-size:13px;cursor:pointer">🔒 İçeriği Gizle</label>
           </div>
-          <button class="btn btn-primary" onclick="adminPostThread()">Konuyu Yayınla</button>
+          <button class="btn btn-primary" onclick="adminPostThread()">Yayınla</button>
         </div>
       </div>
-
-      <!-- DUYURU -->
       <div class="admin-panel" id="panel-announce">
-        <div class="admin-card">
-          <h3>📢 Duyuru Konusu Aç</h3>
+        <div class="admin-card"><h3>📢 Duyuru</h3>
           <div id="ann-alert" class="alert alert-error"></div>
           <div id="ann-success" class="alert alert-success"></div>
-          <div class="form-group">
-            <label>Başlık</label>
-            <input type="text" id="ann-title" placeholder="Duyuru başlığı...">
-          </div>
-          <div class="form-group">
-            <label>İçerik</label>
-            <textarea id="ann-content" placeholder="Duyuru içeriği..."></textarea>
-          </div>
+          <div class="form-group"><label>Duyuru Metni</label><textarea id="ann-content" placeholder="Duyuru içeriği..." style="min-height:100px"></textarea></div>
           <button class="btn btn-primary" onclick="postAnnounce()">Duyuruyu Yayınla</button>
         </div>
       </div>
-
-      <!-- SOHBET -->
       <div class="admin-panel" id="panel-shout">
-        <div class="admin-card">
-          <h3>💬 Sohbet Yönetimi</h3>
-          <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Tüm sohbet mesajlarını temizle veya tek tek sil.</p>
+        <div class="admin-card"><h3>💬 Sohbet Yönetimi</h3>
           <button class="btn btn-primary" style="background:var(--accent2)" onclick="clearShout()">🗑 Tüm Sohbeti Temizle</button>
           <div style="margin-top:20px" id="shout-admin-list"></div>
         </div>
       </div>
-
     </div>
   </div>
 </div>
 
-<script src="app.js"></script>
+<script src="api.js"></script>
 <script>
-const ADMIN_USER = 'zadrex';
-const ADMIN_PASS = 'Yetereren.123';
+let _adminUser = null;
 
-function adminLogin() {
+async function adminLogin() {
   const u = document.getElementById('admin-user').value.trim();
   const p = document.getElementById('admin-pass').value;
-  if (u === ADMIN_USER && p === ADMIN_PASS) {
-    sessionStorage.setItem('cf_admin', '1');
-    // zadrex'i forum oturumuna da al
-    const users = Auth.getUsers();
-    let zadrex = users.find(x => x.username === 'zadrex');
-    if (!zadrex) {
-      zadrex = { id: 1, username: 'zadrex', email: 'zadrex@crackervoid.com', password: ADMIN_PASS, joined: '01.01.2026', posts: 0, role: 'founder' };
-      users.unshift(zadrex);
-      Auth.saveUsers(users);
-    }
-    sessionStorage.setItem('cf_user', JSON.stringify(zadrex));
+  const res = await Auth.login(u, p);
+  if (res.ok && (res.user.role === 'founder' || res.user.role === 'admin' || res.user.role === 'moderator')) {
+    _adminUser = res.user;
+    sessionStorage.setItem('cv_admin', '1');
     document.getElementById('admin-login-screen').style.display = 'none';
     document.getElementById('admin-panel-screen').style.display = 'block';
+    document.getElementById('admin-name-label').textContent = '🛡 ' + _adminUser.username;
     initPanel();
   } else {
     const el = document.getElementById('admin-login-alert');
-    el.textContent = 'Kullanıcı adı veya şifre hatalı.';
-    el.style.display = 'block';
+    el.textContent = 'Yetkisiz giriş veya hatalı bilgi.'; el.style.display = 'block';
   }
 }
 
 function adminLogout() {
-  sessionStorage.removeItem('cf_admin');
-  location.reload();
+  sessionStorage.removeItem('cv_admin');
+  Auth.logout();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  // Enter key on login
+document.addEventListener('DOMContentLoaded', async () => {
   ['admin-user','admin-pass'].forEach(id => {
     document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') adminLogin(); });
   });
-
-  if (sessionStorage.getItem('cf_admin') === '1') {
-    document.getElementById('admin-login-screen').style.display = 'none';
-    document.getElementById('admin-panel-screen').style.display = 'block';
-    initPanel();
+  if (sessionStorage.getItem('cv_admin') === '1') {
+    _adminUser = await Auth.init();
+    if (_adminUser && (_adminUser.role === 'founder' || _adminUser.role === 'admin' || _adminUser.role === 'moderator')) {
+      document.getElementById('admin-login-screen').style.display = 'none';
+      document.getElementById('admin-panel-screen').style.display = 'block';
+      document.getElementById('admin-name-label').textContent = '🛡 ' + _adminUser.username;
+      initPanel();
+    } else {
+      sessionStorage.removeItem('cv_admin');
+    }
   }
-
-  // Sidebar nav
   document.querySelectorAll('.admin-sidebar a').forEach(a => {
     a.addEventListener('click', e => {
       e.preventDefault();
@@ -306,254 +224,209 @@ function refreshPanel(name) {
   if (name === 'shout') renderShoutAdmin();
 }
 
-// ── DASHBOARD ─────────────────────────────────────────
-function renderDashboard() {
-  const s = Forum.stats();
-  const users = Auth.getUsers();
+async function renderDashboard() {
+  const s = await Forum.stats();
+  const users = await apiFetch('/api/admin/users');
   const banned = users.filter(u => u.banned).length;
   document.getElementById('dash-stats').innerHTML = `
     <div class="stat-card"><div class="num">${s.members}</div><div class="lbl">Üye</div></div>
     <div class="stat-card"><div class="num">${s.threads}</div><div class="lbl">Konu</div></div>
     <div class="stat-card"><div class="num">${s.posts}</div><div class="lbl">Mesaj</div></div>
     <div class="stat-card"><div class="num" style="color:#e74c3c">${banned}</div><div class="lbl">Banlı</div></div>`;
-
-  const threads = Forum.getThreads().slice(0, 10);
-  document.getElementById('dash-threads').innerHTML = `
-    <table class="user-table">
-      <thead><tr><th>Başlık</th><th>Yazar</th><th>Kategori</th><th>Yanıt</th><th>İşlem</th></tr></thead>
-      <tbody>${threads.map(t => `
-        <tr>
-          <td><a href="thread.html?id=${t.id}" target="_blank" style="color:var(--text)">${escHtml(t.title)}</a></td>
-          <td>${escHtml(t.author)}</td>
-          <td>${t.cat}</td>
-          <td>${t.replies}</td>
-          <td><button class="action-btn btn-del" onclick="deleteThread(${t.id})">Sil</button></td>
-        </tr>`).join('')}
-      </tbody>
-    </table>`;
+  const threads = await Forum.getThreads();
+  const top = (Array.isArray(threads) ? threads : []).slice(0, 10);
+  document.getElementById('dash-threads').innerHTML = `<table class="user-table">
+    <thead><tr><th>Başlık</th><th>Yazar</th><th>Kategori</th><th>Yanıt</th><th>İşlem</th></tr></thead>
+    <tbody>${top.map(t => `<tr>
+      <td><a href="thread.html?id=${t.id}" target="_blank" style="color:var(--text)">${escHtml(t.title)}</a></td>
+      <td>${escHtml(t.author)}</td><td>${t.cat}</td><td>${t.replies}</td>
+      <td><button class="action-btn btn-del" onclick="deleteThread(${t.id})">Sil</button></td>
+    </tr>`).join('')}</tbody></table>`;
 }
 
-// ── ÜYELER ────────────────────────────────────────────
-function renderUsers() {
+async function renderUsers() {
   const q = (document.getElementById('user-search')?.value || '').toLowerCase();
-  const users = Auth.getUsers().filter(u => u.username.toLowerCase().includes(q) || u.email.toLowerCase().includes(q));
-  document.getElementById('user-table-body').innerHTML = `
-    <thead><tr><th>Kullanıcı</th><th>E-posta</th><th>Katılım</th><th>Mesaj</th><th>Para</th><th>Rank</th><th>Durum</th><th>İşlem</th></tr></thead>
-    <tbody>${users.map(u => {
-      const money = Money.get(u.username);
-      const rank = getRank(u.username);
-      const roleLabel = { member:'Üye', vip:'VIP', moderator:'Moderatör', admin:'Admin', founder:'Kurucu' }[u.role] || 'Üye';
-      return `<tr>
-        <td><strong>${escHtml(u.username)}</strong></td>
-        <td style="color:var(--text3)">${escHtml(u.email)}</td>
-        <td style="color:var(--text3)">${u.joined}</td>
-        <td>${u.posts || 0}</td>
-        <td style="color:#f1c40f">💰 ${money}</td>
-        <td style="color:${rank.color}">${rank.icon} ${rank.name}</td>
-        <td>${u.banned ? '<span class="badge-banned">BANLANDI</span>' : '<span style="color:#2ecc71;font-size:11px">Aktif</span>'}</td>
-        <td>
-          ${u.username !== 'zadrex' ? (u.banned
-            ? `<button class="action-btn btn-unban" onclick="toggleBan('${u.username}',false)">Unban</button>`
-            : `<button class="action-btn btn-ban" onclick="toggleBan('${u.username}',true)">Ban</button>`) : ''}
-          ${u.username !== 'zadrex' ? `<button class="action-btn btn-del" onclick="deleteUser('${u.username}')">Sil</button>` : ''}
-          ${u.username !== 'zadrex' ? `<button class="action-btn btn-money" onclick="warnUser('${u.username}')">⚠ Uyar${u.warns ? ' ('+u.warns+')' : ''}</button>` : ''}
-        </td>
-      </tr>`;
-    }).join('')}
-    </tbody>`;
+  const users = await apiFetch('/api/admin/users');
+  const filtered = users.filter(u => u.username.toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q));
+  const rows = await Promise.all(filtered.map(async u => {
+    const money = await Money.get(u.username);
+    const rank = getRankFromUser(u, money);
+    return `<tr>
+      <td><strong>${escHtml(u.username)}</strong></td>
+      <td style="color:var(--text3)">${escHtml(u.email||'')}</td>
+      <td style="color:var(--text3)">${u.joined||'-'}</td>
+      <td>${u.posts||0}</td>
+      <td style="color:#f1c40f">💰 ${money}</td>
+      <td style="color:${rank.color}">${rank.icon} ${rank.name}</td>
+      <td>${u.banned ? '<span class="badge-banned">BANLANDI</span>' : '<span style="color:#2ecc71;font-size:11px">Aktif</span>'}</td>
+      <td>
+        ${u.username !== 'zadrex' ? (u.banned
+          ? `<button class="action-btn btn-unban" onclick="toggleBan('${u.username}')">Unban</button>`
+          : `<button class="action-btn btn-ban" onclick="toggleBan('${u.username}')">Ban</button>`) : ''}
+        ${u.username !== 'zadrex' ? `<button class="action-btn btn-del" onclick="deleteUser('${u.username}')">Sil</button>` : ''}
+      </td>
+    </tr>`;
+  }));
+  document.getElementById('user-table-body').innerHTML = `<thead><tr><th>Kullanıcı</th><th>E-posta</th><th>Katılım</th><th>Mesaj</th><th>Para</th><th>Rank</th><th>Durum</th><th>İşlem</th></tr></thead><tbody>${rows.join('')}</tbody>`;
 }
 
-function toggleBan(username, ban) {
-  if (!confirm((ban ? 'Banlamak' : 'Banı kaldırmak') + ' istediğine emin misin? → ' + username)) return;
-  const users = Auth.getUsers();
-  const idx = users.findIndex(u => u.username === username);
-  if (idx !== -1) { users[idx].banned = ban; Auth.saveUsers(users); }
+async function toggleBan(username) {
+  if (!confirm('Ban durumunu değiştir: ' + username)) return;
+  await apiFetch('/api/admin/ban/' + username, { method: 'POST' });
   renderUsers();
 }
 
-function deleteUser(username) {
+async function deleteUser(username) {
   if (!confirm(username + ' kullanıcısını silmek istediğine emin misin?')) return;
-  Auth.saveUsers(Auth.getUsers().filter(u => u.username !== username));
-  Forum.saveThreads(Forum.getThreads().filter(t => t.author !== username));
-  Forum.saveReplies(Forum.getReplies().filter(r => r.author !== username));
-  renderUsers();
-  renderDashboard();
+  await apiFetch('/api/admin/delete-user/' + username, { method: 'POST' });
+  renderUsers(); renderDashboard();
 }
 
-// ── KONULAR ───────────────────────────────────────────
-function renderAdminThreads() {
+async function renderAdminThreads() {
   const q = (document.getElementById('thread-search')?.value || '').toLowerCase();
-  const threads = Forum.getThreads().filter(t => t.title.toLowerCase().includes(q) || t.author.toLowerCase().includes(q));
-  document.getElementById('thread-table-body').innerHTML = `
-    <thead><tr><th>Başlık</th><th>Yazar</th><th>Kategori</th><th>Tarih</th><th>Yanıt</th><th>İşlem</th></tr></thead>
-    <tbody>${threads.map(t => `
-      <tr>
-        <td><a href="thread.html?id=${t.id}" target="_blank" style="color:var(--text)">${escHtml(t.title)}</a></td>
-        <td>${escHtml(t.author)}</td>
-        <td>${t.cat}</td>
-        <td style="color:var(--text3)">${t.date}</td>
-        <td>${t.replies}</td>
-        <td>
-          <button class="action-btn btn-del" onclick="deleteThread(${t.id})">Sil</button>
-          <button class="action-btn" style="background:rgba(41,128,185,.2);color:#3498db;border:1px solid rgba(41,128,185,.4)" onclick="pinThread(${t.id})">${t.pinned ? 'Sabiti Kaldır' : 'Sabitle'}</button>
-        </td>
-      </tr>`).join('')}
-    </tbody>`;
+  const threads = await Forum.getThreads();
+  const filtered = (Array.isArray(threads) ? threads : []).filter(t => t.title.toLowerCase().includes(q) || t.author.toLowerCase().includes(q));
+  document.getElementById('thread-table-body').innerHTML = `<thead><tr><th>Başlık</th><th>Yazar</th><th>Kategori</th><th>Tarih</th><th>Yanıt</th><th>İşlem</th></tr></thead>
+    <tbody>${filtered.map(t => `<tr>
+      <td><a href="thread.html?id=${t.id}" target="_blank" style="color:var(--text)">${escHtml(t.title)}</a></td>
+      <td>${escHtml(t.author)}</td><td>${t.cat}</td>
+      <td style="color:var(--text3)">${t.date}</td><td>${t.replies}</td>
+      <td>
+        <button class="action-btn btn-del" onclick="deleteThread(${t.id})">Sil</button>
+        <button class="action-btn" style="background:rgba(41,128,185,.2);color:#3498db;border:1px solid rgba(41,128,185,.4)" onclick="pinThread(${t.id})">${t.pinned?'Sabiti Kaldır':'Sabitle'}</button>
+      </td>
+    </tr>`).join('')}</tbody>`;
 }
 
-function deleteThread(id) {
+async function deleteThread(id) {
   if (!confirm('Konuyu silmek istediğine emin misin?')) return;
-  Forum.saveThreads(Forum.getThreads().filter(t => t.id != id));
-  Forum.saveReplies(Forum.getReplies().filter(r => r.threadId != id));
-  renderAdminThreads();
-  renderDashboard();
+  await Forum.deleteThread(id);
+  renderAdminThreads(); renderDashboard();
 }
 
-function pinThread(id) {
-  const threads = Forum.getThreads();
-  const t = threads.find(x => x.id == id);
-  if (t) { t.pinned = !t.pinned; Forum.saveThreads(threads); }
+async function pinThread(id) {
+  await Forum.togglePin(id);
   renderAdminThreads();
 }
 
-// ── ROL ───────────────────────────────────────────────
-function giveRole() {
+async function giveRole() {
   const username = document.getElementById('role-user').value.trim();
   const role = document.getElementById('role-select').value;
   if (!username) return;
   if (username === 'zadrex') {
     const el = document.getElementById('role-err'); el.textContent = 'Kurucu rolü değiştirilemez.'; el.style.display = 'block'; return;
   }
-  const users = Auth.getUsers();
-  const idx = users.findIndex(u => u.username === username);
-  if (idx === -1) {
-    const el = document.getElementById('role-err'); el.textContent = 'Kullanıcı bulunamadı.'; el.style.display = 'block';
-    document.getElementById('role-msg').style.display = 'none'; return;
+  const res = await apiFetch('/api/admin/role/' + username, { method: 'POST', body: { role } });
+  if (res.ok) {
+    document.getElementById('role-err').style.display = 'none';
+    const el = document.getElementById('role-msg');
+    el.textContent = username + ' kullanıcısına "' + role + '" rolü verildi.'; el.style.display = 'block';
+    document.getElementById('role-user').value = '';
+    renderRoleList();
+  } else {
+    const el = document.getElementById('role-err'); el.textContent = res.msg || 'Hata.'; el.style.display = 'block';
   }
-  users[idx].role = role;
-  Auth.saveUsers(users);
-  document.getElementById('role-err').style.display = 'none';
-  const roleLabel = { member:'Üye', vip:'VIP', moderator:'Moderatör', admin:'Admin' }[role];
-  const el = document.getElementById('role-msg');
-  el.textContent = `${username} kullanıcısına "${roleLabel}" rolü verildi.`; el.style.display = 'block';
-  document.getElementById('role-user').value = '';
-  renderRoleList();
 }
 
-function renderRoleList() {
-  const users = Auth.getUsers();
+async function renderRoleList() {
+  const users = await apiFetch('/api/admin/users');
   const roleColor = { member:'var(--text3)', vip:'#9b59b6', moderator:'#2980b9', admin:'#c0392b', founder:'#c0392b' };
   const roleIcon = { member:'👤', vip:'⭐', moderator:'🔧', admin:'🛡', founder:'👑' };
-  document.getElementById('role-list').innerHTML = `
-    <table class="user-table">
-      <thead><tr><th>Kullanıcı</th><th>Mevcut Rol</th><th>İşlem</th></tr></thead>
-      <tbody>${users.map(u => {
-        const r = u.role || 'member';
-        return `<tr>
-          <td><strong>${escHtml(u.username)}</strong></td>
-          <td style="color:${roleColor[r] || 'var(--text3)'}">${roleIcon[r] || '👤'} ${({ member:'Üye', vip:'VIP', moderator:'Moderatör', admin:'Admin', founder:'Kurucu' })[r] || 'Üye'}</td>
-          <td>${u.username !== 'zadrex' ? `<button class="action-btn btn-ban" onclick="document.getElementById('role-user').value='${u.username}'">Seç</button>` : '—'}</td>
-        </tr>`;
-      }).join('')}
-      </tbody>
-    </table>`;
+  const roleLabel = { member:'Üye', vip:'VIP', moderator:'Moderatör', admin:'Admin', founder:'Kurucu' };
+  document.getElementById('role-list').innerHTML = `<table class="user-table">
+    <thead><tr><th>Kullanıcı</th><th>Mevcut Rol</th><th>İşlem</th></tr></thead>
+    <tbody>${users.map(u => {
+      const r = u.role || 'member';
+      return `<tr>
+        <td><strong>${escHtml(u.username)}</strong></td>
+        <td style="color:${roleColor[r]||'var(--text3)'}">${roleIcon[r]||'👤'} ${roleLabel[r]||'Üye'}</td>
+        <td>${u.username !== 'zadrex' ? `<button class="action-btn btn-ban" onclick="document.getElementById('role-user').value='${u.username}'">Seç</button>` : '—'}</td>
+      </tr>`;
+    }).join('')}</tbody></table>`;
 }
 
-// ── KONU PAYLAŞ ───────────────────────────────────────
-function adminPostThread() {
+async function adminPostThread() {
   const cat = document.getElementById('post-cat').value;
   const title = document.getElementById('post-title').value.trim();
   const content = document.getElementById('post-content').value.trim();
-  const pinned = document.getElementById('post-pin').checked;
   const hidden = document.getElementById('post-hidden').checked;
-  if (!title || !content) {
-    const el = document.getElementById('post-alert'); el.textContent = 'Başlık ve içerik boş olamaz.'; el.style.display = 'block'; return;
+  if (!title || !content) { const el = document.getElementById('post-alert'); el.textContent = 'Başlık ve içerik boş olamaz.'; el.style.display = 'block'; return; }
+  const res = await Forum.addThread(cat, title, content, hidden);
+  if (res) {
+    if (document.getElementById('post-pin').checked) await Forum.togglePin(res);
+    document.getElementById('post-title').value = '';
+    document.getElementById('post-content').value = '';
+    document.getElementById('post-pin').checked = false;
+    document.getElementById('post-hidden').checked = false;
+    document.getElementById('post-alert').style.display = 'none';
+    const s = document.getElementById('post-success');
+    s.textContent = 'Konu yayınlandı: ' + title; s.style.display = 'block';
+    setTimeout(() => s.style.display = 'none', 4000);
   }
-  const threads = Forum.getThreads();
-  threads.unshift({ id: Date.now(), cat, title, content, author: 'zadrex', date: new Date().toLocaleDateString('tr-TR'), replies: 0, views: 0, pinned, hidden });
-  Forum.saveThreads(threads);
-  document.getElementById('post-title').value = '';
-  document.getElementById('post-content').value = '';
-  document.getElementById('post-pin').checked = false;
-  document.getElementById('post-hidden').checked = false;
-  document.getElementById('post-alert').style.display = 'none';
-  const s = document.getElementById('post-success');
-  s.textContent = 'Konu başarıyla yayınlandı! → ' + title; s.style.display = 'block';
-  setTimeout(() => s.style.display = 'none', 4000);
 }
 
-// ── PARA ──────────────────────────────────────────────
-function adminAddMoney() {
+async function adminAddMoney() {
   const u = document.getElementById('money-user').value.trim();
   const a = parseInt(document.getElementById('money-amount').value);
   if (!u || !a || a < 1) return;
-  const users = Auth.getUsers();
-  if (!users.find(x => x.username === u)) {
-    const el = document.getElementById('money-msg');
-    el.className = 'alert alert-error'; el.textContent = 'Kullanıcı bulunamadı.'; el.style.display = 'block'; return;
-  }
-  Money.add(u, a);
+  const res = await apiFetch('/api/admin/money/' + u, { method: 'POST', body: { amount: a, action: 'add' } });
   const el = document.getElementById('money-msg');
-  el.className = 'alert alert-success'; el.textContent = `${u} kullanıcısına ${a} para eklendi.`; el.style.display = 'block';
+  el.className = res.ok ? 'alert alert-success' : 'alert alert-error';
+  el.textContent = res.ok ? (u + ' kullanıcısına ' + a + ' para eklendi.') : (res.msg || 'Hata.');
+  el.style.display = 'block';
   renderMoneyList();
 }
 
-function adminSubMoney() {
+async function adminSubMoney() {
   const u = document.getElementById('money-user').value.trim();
   const a = parseInt(document.getElementById('money-amount').value);
   if (!u || !a || a < 1) return;
-  Money.sub(u, a);
+  const res = await apiFetch('/api/admin/money/' + u, { method: 'POST', body: { amount: a, action: 'sub' } });
   const el = document.getElementById('money-msg');
-  el.className = 'alert alert-success'; el.textContent = `${u} kullanıcısından ${a} para alındı.`; el.style.display = 'block';
+  el.className = res.ok ? 'alert alert-success' : 'alert alert-error';
+  el.textContent = res.ok ? (u + ' kullanıcısından ' + a + ' para alındı.') : (res.msg || 'Hata.');
+  el.style.display = 'block';
   renderMoneyList();
 }
 
-function renderMoneyList() {
-  const data = JSON.parse(localStorage.getItem('cf_money') || '{}');
-  const users = Auth.getUsers();
-  const rows = users.map(u => ({ username: u.username, money: data[u.username] || 0 }))
-    .sort((a, b) => b.money - a.money);
-  document.getElementById('money-list').innerHTML = `
-    <table class="user-table">
-      <thead><tr><th>Kullanıcı</th><th>Bakiye</th><th>Rank</th></tr></thead>
-      <tbody>${rows.map(r => {
-        const rank = getRank(r.username);
-        return `<tr>
-          <td>${escHtml(r.username)}</td>
-          <td style="color:#f1c40f;font-weight:700">💰 ${r.money}</td>
-          <td style="color:${rank.color}">${rank.icon} ${rank.name}</td>
-        </tr>`;
-      }).join('')}</tbody>
-    </table>`;
+async function renderMoneyList() {
+  const users = await apiFetch('/api/admin/users');
+  const rows = await Promise.all(users.map(async u => {
+    const money = await Money.get(u.username);
+    const rank = getRankFromUser(u, money);
+    return { username: u.username, money, rank };
+  }));
+  rows.sort((a,b) => b.money - a.money);
+  document.getElementById('money-list').innerHTML = `<table class="user-table">
+    <thead><tr><th>Kullanıcı</th><th>Bakiye</th><th>Rank</th></tr></thead>
+    <tbody>${rows.map(r => `<tr>
+      <td>${escHtml(r.username)}</td>
+      <td style="color:#f1c40f;font-weight:700">💰 ${r.money}</td>
+      <td style="color:${r.rank.color}">${r.rank.icon} ${r.rank.name}</td>
+    </tr>`).join('')}</tbody></table>`;
 }
 
-// ── DUYURU ────────────────────────────────────────────
-function postAnnounce() {
-  const title = document.getElementById('ann-title').value.trim();
-  const content = document.getElementById('ann-content').value.trim();
-  if (!title || !content) {
-    const el = document.getElementById('ann-alert'); el.textContent = 'Başlık ve içerik boş olamaz.'; el.style.display = 'block'; return;
+async function postAnnounce() {
+  const msg = document.getElementById('ann-content').value.trim();
+  if (!msg) { const el = document.getElementById('ann-alert'); el.textContent = 'İçerik boş olamaz.'; el.style.display = 'block'; return; }
+  const res = await apiFetch('/api/admin/announce', { method: 'POST', body: { msg } });
+  if (res.ok) {
+    document.getElementById('ann-content').value = '';
+    document.getElementById('ann-alert').style.display = 'none';
+    const s = document.getElementById('ann-success'); s.textContent = 'Duyuru yayınlandı.'; s.style.display = 'block';
+    setTimeout(() => s.style.display = 'none', 3000);
   }
-  const threads = Forum.getThreads();
-  threads.unshift({ id: Date.now(), cat: 'duyurular', title, content, author: 'zadrex', date: new Date().toLocaleDateString('tr-TR'), replies: 0, views: 0, pinned: true });
-  Forum.saveThreads(threads);
-  // Popup duyurusu da ayarla
-  Announce.set(title + ' — ' + content.substring(0, 200));
-  document.getElementById('ann-title').value = '';
-  document.getElementById('ann-content').value = '';
-  document.getElementById('ann-alert').style.display = 'none';
-  const s = document.getElementById('ann-success'); s.textContent = 'Duyuru yayınlandı! Tüm kullanıcılara popup gösterilecek.'; s.style.display = 'block';
-  setTimeout(() => s.style.display = 'none', 3000);
 }
 
-// ── SOHBET ────────────────────────────────────────────
-function clearShout() {
+async function clearShout() {
   if (!confirm('Tüm sohbet mesajları silinecek. Emin misin?')) return;
-  Shoutbox.clear();
+  const shouts = await Shoutbox.get();
+  for (const s of shouts) await Shoutbox.delete(s.id);
   renderShoutAdmin();
 }
-function renderShoutAdmin() {
-  const shouts = Shoutbox.get();
+
+async function renderShoutAdmin() {
+  const shouts = await Shoutbox.get();
   const el = document.getElementById('shout-admin-list');
   if (!el) return;
   if (!shouts.length) { el.innerHTML = '<div style="color:var(--text3);font-size:13px">Sohbet boş.</div>'; return; }
@@ -564,23 +437,12 @@ function renderShoutAdmin() {
       <td>${escHtml(s.msg)}</td>
       <td style="color:var(--text3)">${s.time}</td>
       <td><button class="action-btn btn-del" onclick="adminDelShout(${s.id})">Sil</button></td>
-    </tr>`).join('')}</tbody>
-  </table>`;
-}
-function adminDelShout(id) {
-  Shoutbox.save(Shoutbox.get().filter(s => s.id != id));
-  renderShoutAdmin();
+    </tr>`).join('')}</tbody></table>`;
 }
 
-// ── WARN ──────────────────────────────────────────────
-function warnUser(username) {
-  const users = Auth.getUsers();
-  const idx = users.findIndex(u => u.username === username);
-  if (idx === -1) return;
-  users[idx].warns = (users[idx].warns || 0) + 1;
-  Auth.saveUsers(users);
-  Notif.add(username, 'warn', '⚠ Bir uyarı aldın. Toplam uyarı: ' + users[idx].warns, 'notifications.html');
-  renderUsers();
+async function adminDelShout(id) {
+  await Shoutbox.delete(id);
+  renderShoutAdmin();
 }
 </script>
 </body>

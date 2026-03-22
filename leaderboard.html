@@ -25,57 +25,67 @@
     <button class="lb-tab-btn active" data-tab="money">💰 En Zengin</button>
     <button class="lb-tab-btn" data-tab="posts">💬 En Aktif</button>
     <button class="lb-tab-btn" data-tab="threads">📋 En Çok Konu</button>
-    <button class="lb-tab-btn" data-tab="likes">👍 En Çok Like</button>
   </div>
-  <div id="lb-list"></div>
+  <div id="lb-list"><div class="empty-msg">Yükleniyor...</div></div>
 </div>
 <footer>&copy; 2026 <span>CrackerVoid</span></footer>
-<script src="app.js"></script>
+<script src="api.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  let currentTab = 'money';
-  renderLB(currentTab);
+let _lbUsers = [], _lbThreads = [], _currentTab = 'money';
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const user = await Auth.init();
+  const navRight = document.getElementById('nav-right');
+  if (user) {
+    navRight.innerHTML = `<a href="notifications.html" class="btn btn-outline btn-sm">🔔</a>
+      <a href="messages.html" class="btn btn-outline btn-sm">✉</a>
+      <a href="profile.html" class="btn btn-outline btn-sm">${escHtml(user.username)}</a>
+      <button class="btn btn-outline btn-sm" onclick="Auth.logout()">Çıkış</button>`;
+  } else {
+    navRight.innerHTML = `<a href="login.html" class="btn btn-outline btn-sm">Giriş</a>
+      <a href="register.html" class="btn btn-primary btn-sm">Kayıt Ol</a>`;
+  }
+
+  const [users, threads] = await Promise.all([apiFetch('/api/users'), Forum.getThreads()]);
+  const moneyData = {};
+  await Promise.all(users.map(async u => { moneyData[u.username] = await Money.get(u.username); }));
+  _lbUsers = users.map(u => ({ ...u, _money: moneyData[u.username] || 0 }));
+  _lbThreads = Array.isArray(threads) ? threads : [];
+
   document.querySelectorAll('.lb-tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.lb-tab-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      currentTab = btn.dataset.tab;
-      renderLB(currentTab);
+      _currentTab = btn.dataset.tab;
+      renderLB(_currentTab);
     });
   });
+
+  renderLB(_currentTab);
 });
 
 function renderLB(tab) {
-  const users = Auth.getUsers();
-  const threads = Forum.getThreads();
-  const likes = JSON.parse(localStorage.getItem('cf_likes') || '{}');
+  let sorted = _lbUsers.map(u => ({
+    ...u,
+    threadCount: _lbThreads.filter(t => t.author === u.username).length
+  }));
 
-  let sorted = users.map(u => {
-    const totalLikes = threads.filter(t => t.author === u.username).reduce((s, t) => s + (likes[t.id] || []).length, 0);
-    return {
-      username: u.username,
-      money: Money.get(u.username),
-      posts: u.posts || 0,
-      threadCount: threads.filter(t => t.author === u.username).length,
-      likes: totalLikes,
-      avatarImg: u.avatarImg,
-      avatarColor: u.avatarColor
-    };
-  });
-
-  if (tab === 'money')   sorted.sort((a,b) => b.money - a.money);
-  if (tab === 'posts')   sorted.sort((a,b) => b.posts - a.posts);
+  if (tab === 'money')   sorted.sort((a,b) => b._money - a._money);
+  if (tab === 'posts')   sorted.sort((a,b) => (b.posts||0) - (a.posts||0));
   if (tab === 'threads') sorted.sort((a,b) => b.threadCount - a.threadCount);
-  if (tab === 'likes')   sorted.sort((a,b) => b.likes - a.likes);
 
   sorted = sorted.slice(0, 20);
   const medals = ['🥇','🥈','🥉'];
-  const valMap = { money: u => '💰 ' + u.money, posts: u => '💬 ' + u.posts, threads: u => '📋 ' + u.threadCount, likes: u => '👍 ' + u.likes };
+  const valMap = {
+    money:   u => '💰 ' + u._money,
+    posts:   u => '💬 ' + (u.posts||0),
+    threads: u => '📋 ' + u.threadCount
+  };
 
   const el = document.getElementById('lb-list');
   if (!sorted.length) { el.innerHTML = '<div class="empty-msg">Henüz üye yok.</div>'; return; }
   el.innerHTML = sorted.map((u, i) => {
-    const rank = getRank(u.username);
+    const rank = getRankFromUser(u, u._money);
     const av = u.avatarImg
       ? `<img src="${u.avatarImg}" style="width:40px;height:40px;border-radius:50%;object-fit:cover">`
       : `<div style="width:40px;height:40px;border-radius:50%;background:${rank.color};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff">${escHtml(u.username[0].toUpperCase())}</div>`;
